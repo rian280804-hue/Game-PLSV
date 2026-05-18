@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏰 Petualangan Angka Aljabar - Game Edukasi SMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Quicksand:wght@400;600;700&display=swap');
+        
+        :root {
+            --blue-light: #7dd3fc;
+            --yellow: #fde047;
+            --green-neon: #a3e635;
+            --orange: #fb923c;
+            --purple-pastel: #c4b5fd;
+        }
+        
+        * {
+            scroll-behavior: smooth;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #0f0a2e 0%, #1a1040 30%, #0d1b3e 60%, #0f0a2e 100%);
+            min-height: 100vh;
+        }
+        
+        .game-bg {
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 60%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(34, 211, 238, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, #0f0a2e 0%, #1a1040 50%, #0d1b3e 100%);
+        }
+        
+        .card-game {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .card-game:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 12px 40px rgba(139, 92, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .btn-game {
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 28px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(139, 92, 246, 0.4);
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            font-family: 'Fredoka One', cursive;
+        }
+        
+        .btn-game:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 32px rgba(139, 92, 246, 0.6);
+            background: linear-gradient(135deg, #9b6cf9 0%, #f05aa0 100%);
+        }
+        
+        .btn-game:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            box-shadow: 0 6px 24px rgba(245, 158, 11, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+            box-shadow: 0 6px 24px rgba(239, 68, 68, 0.4);
+        }
+        
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            overflow: hidden;
+            height: 12px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #8b5cf6, #ec4899, #f59e0b);
+            height: 100%;
+            border-radius: 50px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 40px rgba(236, 72, 153, 0.4);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.8), 0 0 60px rgba(236, 72, 153, 0.4); }
+        }
+        
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        @keyframes confettiFall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+        
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.5); }
+        }
+        
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-pulse-glow { animation: pulseGlow 2s ease-in-out infinite; }
+        .animate-pop { animation: pop 0.3s ease-out; }
+        .animate-shake { animation: shake 0.5s ease-in-out; }
+        .animate-spin-slow { animation: spin-slow 3s linear infinite; }
+        .animate-twinkle { animation: twinkle 1.5s ease-in-out infinite; }
+        
+        .monster-card {
+            animation: float 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(255, 100, 100, 0.5));
+        }
+        
+        .confetti-piece {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            animation: confettiFall 3s ease-in-out forwards;
+        }
+        
+        .character-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+        
+        .character-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+            border-color: #8b5cf6 !important;
+        }
+        
+        .character-card.selected {
+            border-color: #fde047 !important;
+            box-shadow: 0 0 50px rgba(250, 204, 21, 0.7);
+            transform: scale(1.08);
+        }
+        
+        .option-btn {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .option-btn:hover {
+            transform: scale(1.02);
+            border-color: #8b5cf6 !important;
+        }
+        
+        .option-btn.correct-flash {
+            background: rgba(34, 197, 94, 0.4) !important;
+            border-color: #22c55e !important;
+        }
+        
+        .option-btn.wrong-flash {
+            background: rgba(239, 68, 68, 0.4) !important;
+            border-color: #ef4444 !important;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #8b5cf6, #ec4899);
+            border-radius: 10px;
+        }
+        
+        @media (max-width: 640px) {
+            .btn-game {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            .card-game {
+                border-radius: 16px;
+                padding: 16px !important;
+            }
+        }
+    </style>
+</head>
+<body class="game-bg">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // ==================== AUDIO ENGINE ====================
+        const useAudio = () => {
+            const audioCtxRef = useRef(null);
+
+            const getAudioCtx = () => {
+                if (!audioCtxRef.current) {
+                    try {
+                        audioCtxRef.current = new(window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        return null;
+                    }
+                }
+                return audioCtxRef.current;
+            };
+
+            const playTone = useCallback((freq, duration, type = 'sine', vol = 0.1) => {
+                try {
+                    const ctx = getAudioCtx();
+                    if (!ctx) return;
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + duration);
+                } catch (e) { /* silent */ }
+            }, []);
+
+            const playCorrect = useCallback(() => {
+                playTone(523, 0.1, 'sine', 0.1);
+                setTimeout(() => playTone(659, 0.1, 'sine', 0.1), 100);
+                setTimeout(() => playTone(784, 0.15, 'sine', 0.12), 200);
+            }, [playTone]);
+
+            const playWrong = useCallback(() => {
+                playTone(200, 0.3, 'sawtooth', 0.08);
+                setTimeout(() => playTone(150, 0.3, 'sawtooth', 0.06), 150);
+            }, [playTone]);
+
+            const playClick = useCallback(() => playTone(440, 0.05, 'sine', 0.03), [playTone]);
+            const playLevelUp = useCallback(() => {
+                [523, 659, 784, 1047].forEach((f, i) =>
+                    setTimeout(() => playTone(f, 0.12, 'sine', 0.12), i * 100)
+                );
+            }, [playTone]);
+            const playCoin = useCallback(() => playTone(1200, 0.06, 'sine', 0.08), [playTone]);
+            const playVictory = useCallback(() => {
+                [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) =>
+                    setTimeout(() => playTone(f, 0.15, 'sine', 0.15), i * 110)
+                );
+            }, [playTone]);
+
+            return { playCorrect, playWrong, playClick, playLevelUp, playCoin, playVictory };
+        };
+
+        // ==================== CONFETTI ====================
+        const spawnConfetti = () => {
+            const colors = ['#fde047', '#a3e635', '#7dd3fc', '#fb923c', '#c4b5fd', '#f472b6', '#34d399', '#fbbf24'];
+            for (let i = 0; i < 50; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti-piece';
+                el.style.left = Math.random() * 100 + '%';
+                el.style.top = -(Math.random() * 30 + 10) + 'px';
+                el.style.width = (Math.random() * 8 + 5) + 'px';
+                el.style.height = (Math.random() * 8 + 5) + 'px';
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                el.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                el.style.animationDelay = Math.random() * 0.6 + 's';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 3500);
+            }
+        };
+
+        // ==================== DATA SOAL LENGKAP ====================
+        const allQuestionsData = {
+            1: {
+                title: '🌱 Mengenal Variabel & Koefisien',
+                description: 'Temukan variabel dan koefisien dari bentuk aljabar!',
+                monster: '🐛',
+                monsterName: 'Cacing Angka',
+                monsterHP: 4,
+                questions: [
+                    {
+                        type: 'multiple',
+                        q: 'Pada bentuk aljabar 5x + 3, yang merupakan variabel adalah...',
+                        options: ['5', 'x', '3', '+'],
+                        answer: 1,
+                        points: 10
+                    },
+                    {
+                        type: 'multiple',
+                        q: 'Koefisien dari x pada bentuk 7x - 2y + 4 adalah...',
+                        options: ['7', '-2', '4', 'x'],
+                        answer: 0,
+                        points: 10
+                    },
+                    {
+                        type: 'multiple',
+                        q: 'Pada 3a² + 2a - 5, koefisien dari a adalah...',
+                        options: ['3', '2', '-5', 'a²'],
+                        answer: 1,
+                        points: 10
+                    },
+                    {
+                        type: 'truefalse',
+                        q: 'Variabel pada 4m + 2n adalah m dan n',
+                        answer: true,
+                        points: 10
+                    },
+                ]
+            },
+            2: {
+                title: '🌿 Menentukan Suku Sejenis',
+                description: 'Kelompokkan suku-suku sejenis dengan tepat!',
+                monster: '🦎',
+                monsterName: 'Kadal Aljabar',
+                monsterHP: 4,
+                questions: [
+                    {
+                        type: 'multiple',
+                        q: 'Suku sejenis dari 3x² adalah...',
+                        options: ['3x', '5x²', '3y²', 'x³'],
+                        answer: 1,
+                        points: 10
+                    },
+                    {
+                        type: 'multiple',
+                        q: 'Manakah yang termasuk suku sejenis dengan 2ab?',
+                        options: ['2a', '3ab', '2b', 'ab²'],
+                        answer: 1,
+                        points: 10
+                    },
+                    {
+                        type: 'multiple',
+                        q: 'Dari 4x, 5y, 2x, 3z, suku sejenisnya adalah...',
+                        options: ['4x dan 5y', '4x dan 2x', '5y dan 3z', 'semua sejenis'],
+                        answer: 1,
+                        points: 10
+                    },
+                    {
+                        type: 'truefalse',
+                        q: '2x dan 2x² adalah suku sejenis',
+                        answer: false,
+                        points: 10
+                    },
+                ]
+            },
+            3: {
+                title: '🍃 Penjumlahan Aljabar',
+                description: 'Jumlahkan bentuk aljabar berikut dengan benar!',
+                monster: '🐺',
+                monsterName: 'Serigala Sigma',
+                monsterHP: 5,
+                questions: [
+                    {
+                        type: 'multiple',
+                        q: '(3x + 2) + (5x - 1) = ...',
+                        options: ['8x + 1', '8x + 3', '2x + 1', '8x - 1'],
+                        answer: 0,
+                        points: 10
+                    },
+                    {
+                        type: 'multiple',
+                        q: '(2a + 3b) + (4a - b) = ...',
+                        options: ['6a + 4b', '6a + 2b', '2a + 2b', '6a + b'],
+                        answer: 1,
+                        points: 10
+                    },
+                    {
+                        type: 'multiple',
+                        q: '(x² + 3x) + (2x² - x) = ...',
+                        options: ['3x² + 2x', '3x² + 4x', 'x² + 2x', '3x² - 2x'],
+                        answer: 0,
+                        points: 10
+                    },
+                    {
+                        type: 'fill',
+                        q: '(7m - 2n) + (3m + 5n) = ... (dalam bentuk: am+bn)',
+                        answer: '10m+3n',
+                        points: 15,
+                        alternatives: ['10m + 3n', '10m+3n']
+                    },
+                ]
+            },
+            4: {
+                title: '🍂 Pengurangan Aljabar',
+                description: 'Kurangkan bentuk aljabar dengan hati-hati!',
+                monster: '🐉',
+                monsterName: 'Naga Minus',
+                monsterHP: 5,
+                questions: [
+                    {
+                        type: 'multiple',
+                        q: '(8x + 5) - (3x + 2) = ...',
+                        options: ['5x + 3', '11x + 7', '5x + 7', '5x - 3'],
+                        answer: 0,
+                        points: 10
+                    },
+                    {
+                        type: 'multiple',
+                        q: '(6a - 2b) - (2a + b) = ...',
+                        options: ['4a - b', '4a - 3b', '8a - b', '4a + b'],
+                        answer: 1,
+                        points: 10
+                    },
+                    {
+                        type: 'multiple',
+                        q: '(3x² - x) - (x² + 2x) = ...',
+                        options: ['2x² - 3x', '2x² + x', '4x² - 3x', '2x² + 3x'],
+                        answer: 0,
+                        points: 10
+                    },
+                    {
+                        type: 'fill',
+                        q: '(9m + 4) - (5m - 2) = ... (dalam bentuk: am+b)',
+                        answer: '4m+6',
+                        points: 15,
+                        alternatives: ['4m + 6', '4m+6']
+                    },
+                ]
+            },
+            5: {
+                title: '🌳 Perkalian Aljabar',
+                description: 'Kalikan bentuk aljabar dengan tepat!',
+                monster: '🦂',
+                monsterName: 'Kalajengking Kali',
+                monsterHP: 6,
+                questions: [
+                    {
+                        type: 'multiple',
+                        q: '3 × (2x + 1) = ...',
+                        options: ['6x + 3', '5x + 3', '6x + 1', '5x + 1'],
+                        answer: 0,
+                        points: 10
+                    },
+                    {
+                        type: 'multiple',
+                        q: 'x × (x + 4) = ...',
+                        options: ['x² + 4', 'x² + 4x', '2x + 4', 'x + 4x'],
+                        answer: 1,
+                        points: 10
+                    },
+                    {
+                        type: 'multiple',
+                        q: '2a × (3a - b) = ...',
+                        options: ['6a² - 2ab', '5a² - 2ab', '6a² - 2b', '6a² + 2ab'],
+                        answer: 0,
+                        points: 10
+                    },
+                    {
+                        type: 'fill',
+                        q: '(x+2)(x+3) = ... (dalam bentuk: x²+bx+c)',
+                        answer: 'x²+5x+6',
+                        points: 20,
+                        alternatives: ['x² + 5x + 6', 'x²+5x+6', 'x2+5x+6']
+                    },
+                ]
+            },
+            6: {
+                title: '👑 Boss Battle: Raja Aljabar',
+                description: 'Kalahkan Raja Aljabar! Jawab semua soal dengan cepat!',
+                monster: '👹',
+                monsterName: 'Raja Aljabar',
+                monsterHP: 8,
+                bossBattle: true,
+                timeLimit: 90,
+                questions: [
+                    {
+                        type: 'multiple',
+                        q: 'Sederhanakan: 3x + 2y - x + 4y = ...',
+                        options: ['2x + 6y', '4x + 6y', '2x + 2y', '3x + 6y'],
+                        answer: 0,
+                        points: 15
+                    },
+                    {
+                        type: 'multiple',
+                        q: 'Faktor dari x² - 9 adalah...',
+                        options: ['(x-9)(x+1)', '(x-3)(x+3)', '(x-3)(x-3)', '(x+9)(x-1)'],
+                        answer: 1,
+                        points: 15
+                    },
+                    {
+                        type: 'multiple',
+                        q: '(2x+1)(x-3) = ...',
+                        options: ['2x²-5x-3', '2x²+5x-3', '2x²-5x+3', '2x²-6x-3'],
+                        answer: 0,
+                        points: 15
+                    },
+                    {
+                        type: 'fill',
+                        q: 'Sederhanakan: 2(3a+b) - (a-2b) = ... (dalam bentuk: xa+yb)',
+                        answer: '5a+4b',
+                        points: 20,
+                        alternatives: ['5a + 4b', '5a+4b']
+                    },
+                    {
+                        type: 'multiple',
+                        q: 'Bentuk sederhana dari (x²-4)/(x-2) untuk x≠2 adalah...',
+                        options: ['x-2', 'x+2', 'x²+2', 'x+4'],
+                        answer: 1,
+                        points: 15
+                    },
+                    {
+                        type: 'truefalse',
+                        q: '4x² - 9 dapat difaktorkan menjadi (2x-3)(2x+3)',
+                        answer: true,
+                        points: 10
+                    },
+                ]
+            }
+        };
+
+        // ==================== BADGES ====================
+        const badgesList = [
+            { id: 'first_blood', name: 'First Blood', icon: '🏆', desc: 'Menyelesaikan level pertama' },
+            { id: 'combo3', name: 'Combo x3', icon: '⚡', desc: '3 jawaban benar berturut-turut' },
+            { id: 'combo5', name: 'Combo x5', icon: '🌟', desc: '5 jawaban benar berturut-turut' },
+            { id: 'speed', name: 'Speed Demon', icon: '💨', desc: 'Jawab soal dalam <8 detik' },
+            { id: 'perfect', name: 'Perfect Level', icon: '💎', desc: 'Semua jawaban benar 1 level' },
+            { id: 'boss_slayer', name: 'Boss Slayer', icon: '👑', desc: 'Mengalahkan Raja Aljabar' },
+            { id: 'all_levels', name: 'Master Aljabar', icon: '🎓', desc: 'Menyelesaikan semua level' },
+            { id: 'score100', name: 'Centurion', icon: '💯', desc: 'Mencapai 100+ poin' },
+        ];
+
+        // ==================== KARAKTER ====================
+        const characters = [
+            { id: 'wizard', name: 'Penyihir Angka', emoji: '🧙‍♂️', desc: 'Ahli sihir aljabar', color: '#8b5cf6' },
+            { id: 'knight', name: 'Ksatria X', emoji: '⚔️', desc: 'Pemberani dengan pedang variabel', color: '#f59e0b' },
+            { id: 'archer', name: 'Pemanah Koefisien', emoji: '🏹', desc: 'Tepat sasaran dalam hitungan', color: '#10b981' },
+            { id: 'mage', name: 'Mage Persamaan', emoji: '🔮', desc: 'Menguasai rumus ajaib', color: '#ec4899' },
+        ];
+
+        // ==================== MAIN APP ====================
+        const App = () => {
+            const [screen, setScreen] = useState('intro');
+            const [selectedChar, setSelectedChar] = useState(null);
+            const [currentLevel, setCurrentLevel] = useState(1);
+            const [unlockedLevels, setUnlockedLevels] = useState([1]);
+            const [score, setScore] = useState(0);
+            const [xp, setXp] = useState(0);
+            const [playerLevel, setPlayerLevel] = useState(1);
+            const [hearts, setHearts] = useState(5);
+            const [combo, setCombo] = useState(0);
+            const [maxCombo, setMaxCombo] = useState(0);
+            const [badges, setBadges] = useState([]);
+            const [totalCorrect, setTotalCorrect] = useState(0);
+            const [totalWrong, setTotalWrong] = useState(0);
+            const [gameHistory, setGameHistory] = useState([]);
+            const [diagnosticDone, setDiagnosticDone] = useState(false);
+            const [leaderboard, setLeaderboard] = useState([]);
+            const audio = useAudio();
+
+            // Load from localStorage on mount
+            useEffect(() => {
+                const saved = localStorage.getItem('aljabar-game-save-v2');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        if (data.unlockedLevels) setUnlockedLevels(data.unlockedLevels);
+                        if (data.score) setScore(data.score);
+                        if (data.xp) setXp(data.xp);
+                        if (data.playerLevel) setPlayerLevel(data.playerLevel);
+                        if (data.badges) setBadges(data.badges);
+                        if (data.diagnosticDone) setDiagnosticDone(data.diagnosticDone);
+                        if (data.totalCorrect) setTotalCorrect(data.totalCorrect);
+                        if (data.totalWrong) setTotalWrong(data.totalWrong);
+                        if (data.maxCombo) setMaxCombo(data.maxCombo);
+                        if (data.selectedChar) setSelectedChar(data.selectedChar);
+                        if (data.leaderboard) setLeaderboard(data.leaderboard);
+                        if (data.hearts !== undefined) setHearts(data.hearts);
+                        if (data.combo !== undefined) setCombo(data.combo);
+                        if (data.gameHistory) setGameHistory(data.gameHistory);
+                    } catch (e) {
+                        console.error('Error loading save:', e);
+                    }
+                }
+            }, []);
+
+            // Save to localStorage
+            const saveGame = useCallback(() => {
+                const data = {
+                    unlockedLevels,
+                    score,
+                    xp,
+                    playerLevel,
+                    badges,
+                    diagnosticDone,
+                    totalCorrect,
+                    totalWrong,
+                    maxCombo,
+                    selectedChar,
+                    leaderboard,
+                    hearts,
+                    combo,
+                    gameHistory,
+                };
+                localStorage.setItem('aljabar-game-save-v2', JSON.stringify(data));
+            }, [unlockedLevels, score, xp, playerLevel, badges, diagnosticDone, totalCorrect, totalWrong, maxCombo, selectedChar, leaderboard, hearts, combo, gameHistory]);
+
+            useEffect(() => {
+                saveGame();
+            }, [saveGame]);
+
+            const addScore = useCallback((pts, isCorrect) => {
+                if (isCorrect) {
+                    const bonus = combo >= 2 ? Math.floor(combo / 2) * 5 : 0;
+                    setScore(s => s + pts + bonus);
+                    setCombo(c => {
+                        const newCombo = c + 1;
+                        setMaxCombo(m => Math.max(m, newCombo));
+                        // Check badge combo
+                        if (newCombo >= 3) {
+                            setBadges(b => {
+                                if (!b.find(badge => badge.id === 'combo3')) {
+                                    return [...b, badgesList.find(bl => bl.id === 'combo3')];
+                                }
+                                return b;
+                            });
+                        }
+                        if (newCombo >= 5) {
+                            setBadges(b => {
+                                if (!b.find(badge => badge.id === 'combo5')) {
+                                    return [...b, badgesList.find(bl => bl.id === 'combo5')];
+                                }
+                                return b;
+                            });
+                        }
+                        return newCombo;
+                    });
+                    setTotalCorrect(c => c + 1);
+                    setXp(x => {
+                        const newXp = x + pts;
+                        if (newXp >= playerLevel * 100) {
+                            setPlayerLevel(l => l + 1);
+                            audio.playLevelUp();
+                        }
+                        return newXp;
+                    });
+                    audio.playCorrect();
+                    // Check score badge
+                    setScore(s => {
+                        if (s + pts + bonus >= 100) {
+                            setBadges(b => {
+                                if (!b.find(badge => badge.id === 'score100')) {
+                                    return [...b, badgesList.find(bl => bl.id === 'score100')];
+                                }
+                                return b;
+                            });
+                        }
+                        return s + pts + bonus;
+                    });
+                } else {
+                    setScore(s => Math.max(0, s - 5));
+                    setCombo(0);
+                    setHearts(h => Math.max(0, h - 1));
+                    setTotalWrong(w => w + 1);
+                    audio.playWrong();
+                }
+            }, [combo, playerLevel, audio]);
+
+            const unlockLevel = useCallback((level) => {
+                setUnlockedLevels(prev => {
+                    if (prev.includes(level)) return prev;
+                    return [...prev, level].sort((a, b) => a - b);
+                });
+            }, []);
+
+            const addBadge = useCallback((badgeId) => {
+                const badge = badgesList.find(b => b.id === badgeId);
+                if (badge) {
+                    setBadges(b => {
+                        if (!b.find(existing => existing.id === badgeId)) {
+                            return [...b, badge];
+                        }
+                        return b;
+                    });
+                }
+            }, []);
+
+            const resetGame = useCallback(() => {
+                setScore(0);
+                setXp(0);
+                setPlayerLevel(1);
+                setHearts(5);
+                setCombo(0);
+                setMaxCombo(0);
+                setBadges([]);
+                setTotalCorrect(0);
+                setTotalWrong(0);
+                setUnlockedLevels([1]);
+                setCurrentLevel(1);
+                setDiagnosticDone(false);
+                setGameHistory([]);
+                setSelectedChar(null);
+                localStorage.removeItem('aljabar-game-save-v2');
+            }, []);
+
+            const addToLeaderboard = useCallback((name) => {
+                const entry = {
+                    name: name || selectedChar?.name || 'Pemain',
+                    score,
+                    level: currentLevel,
+                    badges: badges.length,
+                    date: new Date().toLocaleDateString('id-ID'),
+                };
+                setLeaderboard(prev => {
+                    const updated = [...prev, entry].sort((a, b) => b.score - a.score).slice(0, 10);
+                    return updated;
+                });
+            }, [score, currentLevel, badges, selectedChar]);
+
+            const handleExportExcel = useCallback(() => {
+                let csv = 'Data Hasil Belajar Petualangan Angka Aljabar\n';
+                csv += 'Kategori,Nilai\n';
+                csv += `Skor Akhir,${score}\n`;
+                csv += `Jawaban Benar,${totalCorrect}\n`;
+                csv += `Jawaban Salah,${totalWrong}\n`;
+                csv += `Level Tertinggi,${Math.max(...unlockedLevels)}\n`;
+                csv += `Badge Diperoleh,${badges.map(b => b.name).join('; ')}\n`;
+                csv += `Player Level,${playerLevel}\n`;
+                csv += `Max Combo,${maxCombo}\n`;
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'hasil-belajar-aljabar.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+            }, [score, totalCorrect, totalWrong, unlockedLevels, badges, playerLevel, maxCombo]);
+
+            const handleShareWA = useCallback(() => {
+                const text = `🏰 *Petualangan Angka Aljabar* 🏰\n\n🎮 Skor: *${score}*\n⭐ Level: *${currentLevel}*\n✅ Benar: ${totalCorrect}\n❌ Salah: ${totalWrong}\n🏅 Badge: ${badges.length}\n💡 Combo Max: ${maxCombo}x\n\n📚 Ayo belajar aljabar bersama!`;
+                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+            }, [score, currentLevel, totalCorrect, totalWrong, badges, maxCombo]);
+
+            const navigateTo = useCallback((newScreen) => {
+                audio.playClick();
+                setScreen(newScreen);
+            }, [audio]);
+
+            return (
+                <div className="min-h-screen game-bg relative">
+                    {/* Star particles background */}
+                    {Array.from({ length: 25 }).map((_, i) => (
+                        <div
+                            key={i}
+                            className="absolute rounded-full bg-white pointer-events-none"
+                            style={{
+                                left: Math.random() * 100 + '%',
+                                top: Math.random() * 100 + '%',
+                                width: (Math.random() * 3 + 1) + 'px',
+                                height: (Math.random() * 3 + 1) + 'px',
+                                opacity: Math.random() * 0.6 + 0.2,
+                                animation: `twinkle ${Math.random() * 3 + 2}s ease-in-out infinite`,
+                                animationDelay: Math.random() * 2 + 's',
+                            }}
+                        />
+                    ))}
+
+                    {/* Screen Router */}
+                    {screen === 'intro' && (
+                        <IntroScreen
+                            onStart={() => {
+                                if (!selectedChar) navigateTo('character');
+                                else if (!diagnosticDone) navigateTo('diagnostic');
+                                else navigateTo('game');
+                            }}
+                            onReset={resetGame}
+                            hasSave={!!localStorage.getItem('aljabar-game-save-v2') && unlockedLevels.length > 0}
+                            hasCharSelected={!!selectedChar}
+                            audio={audio}
+                        />
+                    )}
+
+                    {screen === 'character' && (
+                        <CharacterSelect
+                            characters={characters}
+                            selectedChar={selectedChar}
+                            setSelectedChar={(char) => {
+                                setSelectedChar(char);
+                                audio.playClick();
+                            }}
+                            onNext={() => {
+                                if (!diagnosticDone) navigateTo('diagnostic');
+                                else navigateTo('game');
+                            }}
+                            selectedChar={selectedChar}
+                        />
+                    )}
+
+                    {screen === 'diagnostic' && (
+                        <DiagnosticTest
+                            onComplete={(diagScore) => {
+                                setDiagnosticDone(true);
+                                audio.playLevelUp();
+                                navigateTo('game');
+                            }}
+                            audio={audio}
+                        />
+                    )}
+
+                    {screen === 'game' && (
+                        <GameScreen
+                            currentLevel={currentLevel}
+                            setCurrentLevel={setCurrentLevel}
+                            unlockedLevels={unlockedLevels}
+                            unlockLevel={unlockLevel}
+                            score={score}
+                            addScore={addScore}
+                            hearts={hearts}
+                            setHearts={setHearts}
+                            combo={combo}
+                            setCombo={setCombo}
+                            xp={xp}
+                            playerLevel={playerLevel}
+                            selectedChar={selectedChar}
+                            badges={badges}
+                            addBadge={addBadge}
+                            totalCorrect={totalCorrect}
+                            totalWrong={totalWrong}
+                            setScreen={setScreen}
+                            audio={audio}
+                            spawnConfetti={spawnConfetti}
+                            allQuestionsData={allQuestionsData}
+                            setGameHistory={setGameHistory}
+                            navigateTo={navigateTo}
+                        />
+                    )}
+
+                    {screen === 'result' && (
+                        <ResultScreen
+                            score={score}
+                            totalCorrect={totalCorrect}
+                            totalWrong={totalWrong}
+                            badges={badges}
+                            playerLevel={playerLevel}
+                            currentLevel={currentLevel}
+                            maxCombo={maxCombo}
+                            selectedChar={selectedChar}
+                            onReplay={() => {
+                                setHearts(5);
+                                setCombo(0);
+                                navigateTo('game');
+                            }}
+                            onHome={() => navigateTo('intro')}
+                            onExportExcel={handleExportExcel}
+                            onShareWA={handleShareWA}
+                            addToLeaderboard={addToLeaderboard}
+                            leaderboard={leaderboard}
+                            spawnConfetti={spawnConfetti}
+                        />
+                    )}
+
+                    {screen === 'report' && (
+                        <ReportScreen
+                            score={score}
+                            totalCorrect={totalCorrect}
+                            totalWrong={totalWrong}
+                            badges={badges}
+                            playerLevel={playerLevel}
+                            currentLevel={currentLevel}
+                            maxCombo={maxCombo}
+                            unlockedLevels={unlockedLevels}
+                            gameHistory={gameHistory}
+                            onBack={() => navigateTo('game')}
+                            onExportExcel={handleExportExcel}
+                            onShareWA={handleShareWA}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        // ==================== INTRO SCREEN ====================
+        const IntroScreen = ({ onStart, onReset, hasSave, hasCharSelected, audio }) => {
+            const [showContent, setShowContent] = useState(false);
+
+            useEffect(() => {
+                const timer = setTimeout(() => setShowContent(true), 300);
+                return () => clearTimeout(timer);
+            }, []);
+
+            return (
+                <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8 text-center">
+                    <div className="animate-float mb-4">
+                        <span className="text-7xl md:text-8xl" role="img" aria-label="castle">🏰</span>
+                    </div>
+                    
+                    <h1 className="font-game text-3xl md:text-5xl text-white glow-text mb-3" style={{fontFamily: "'Fredoka One', cursive"}}>
+                        Petualangan<br/>Angka Aljabar
+                    </h1>
+                    
+                    <p className="text-lg md:text-xl text-purple-200 mb-2" style={{fontFamily: "'Quicksand', sans-serif"}}>
+                        🧙‍♂️ Selamatkan Dunia Numerik! 🌌
+                    </p>
+                    
+                    <p className="text-sm text-blue-300 mb-6" style={{fontFamily: "'Nunito', sans-serif"}}>
+                        Game Edukasi Matematika SMP Kelas 8
+                    </p>
+
+                    {/* Animated monsters */}
+                    <div className="flex gap-4 md:gap-8 mb-6">
+                        <span className="text-3xl md:text-4xl animate-float" role="img" style={{animationDelay: '0s'}}>🐛</span>
+                        <span className="text-3xl md:text-4xl animate-float" role="img" style={{animationDelay: '0.3s'}}>🦎</span>
+                        <span className="text-3xl md:text-4xl animate-float" role="img" style={{animationDelay: '0.6s'}}>🐺</span>
+                        <span className="text-3xl md:text-4xl animate-float" role="img" style={{animationDelay: '0.9s'}}>👹</span>
+                    </div>
+
+                    <div className={`flex flex-col gap-3 transition-all duration-700 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <button
+                            onClick={onStart}
+                            className="btn-game text-lg px-8 py-3 animate-pulse-glow"
+                        >
+                            {hasSave && hasCharSelected ? '💾 Lanjutkan Petualangan' : '⚡ Mulai Petualangan'}
+                        </button>
+                        
+                        {hasSave && (
+                            <button
+                                onClick={() => {
+                                    if (confirm('Yakin ingin mereset semua progress? Data tidak bisa dikembalikan!')) {
+                                        onReset();
+                                    }
+                                }}
+                                className="btn-game btn-warning text-base"
+                            >
+                                🔄 Reset Progress
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="mt-6 flex gap-3 flex-wrap justify-center">
+                        <span className="text-xl animate-spin-slow">🌟</span>
+                        <span className="text-xl animate-spin-slow" style={{animationDelay: '0.5s'}}>⭐</span>
+                        <span className="text-xl animate-spin-slow" style={{animationDelay: '1s'}}>💫</span>
+                        <span className="text-xl animate-spin-slow" style={{animationDelay: '1.5s'}}>✨</span>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==================== CHARACTER SELECT ====================
+        const CharacterSelect = ({ characters, selectedChar, setSelectedChar, onNext }) => {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+                    <h2 className="text-2xl md:text-4xl text-white mb-2 text-center" style={{fontFamily: "'Fredoka One', cursive"}}>
+                        Pilih Karaktermu! 🦸
+                    </h2>
+                    <p className="text-purple-200 mb-6 text-center" style={{fontFamily: "'Quicksand', sans-serif"}}>
+                        Siapa yang akan menjelajahi dunia aljabar?
+                    </p>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl w-full mb-6">
+                        {characters.map(char => (
+                            <div
+                                key={char.id}
+                                onClick={() => setSelectedChar(char)}
+                                className={`character-card card-game p-5 text-center ${selectedChar?.id === char.id ? 'selected' : ''}`}
+                                style={{borderColor: selectedChar?.id === char.id ? '#fde047' : 'transparent'}}
+                            >
+                                <span className="text-5xl block mb-3">{char.emoji}</span>
+                                <h3 className="text-white text-lg mb-1" style={{fontFamily: "'Fredoka One', cursive"}}>{char.name}</h3>
+                                <p className="text-gray-300 text-sm" style={{fontFamily: "'Nunito', sans-serif"}}>{char.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    <button
+                        onClick={onNext}
+                        disabled={!selectedChar}
+                        className={`btn-game text-lg px-8 ${!selectedChar ? 'opacity-50 cursor-not-allowed' : 'animate-pulse-glow'}`}
+                    >
+                        {selectedChar ? '🚀 Lanjutkan!' : '👆 Pilih Karakter Dulu'}
+                    </button>
+                </div>
+            );
+        };
+
+        // ==================== DIAGNOSTIC TEST ====================
+        const DiagnosticTest = ({ onComplete, audio }) => {
+            const [step, setStep] = useState(0);
+            const [answers, setAnswers] = useState([]);
+            const [selectedOption, setSelectedOption] = useState(null);
+            const [feedback, setFeedback] = useState(null);
+            
+            const questions = [
+                { q: 'Berapakah koefisien dari x pada 5x + 3?', options: ['5', 'x', '3', '8'], answer: 0 },
+                { q: 'Suku sejenis dari 4a² adalah...', options: ['4a', '3a²', '4b²', 'a³'], answer: 1 },
+                { q: '(2x + 1) + (3x - 2) = ...', options: ['5x-1', '5x+3', '5x-3', 'x-1'], answer: 0 },
+                { q: '(5a - 2) - (2a + 1) = ...', options: ['3a-3', '3a+1', '7a-1', '3a-1'], answer: 0 },
+                { q: '2 × (x + 3) = ...', options: ['2x+6', '2x+3', 'x+6', '2x+5'], answer: 0 },
+            ];
+
+            const handleAnswer = (idx) => {
+                if (feedback) return;
+                setSelectedOption(idx);
+                const isCorrect = idx === questions[step].answer;
+                setFeedback(isCorrect ? 'correct' : 'wrong');
+                const newAnswers = [...answers, { question: step, correct: isCorrect }];
+                setAnswers(newAnswers);
+                
+                if (isCorrect) audio.playCorrect();
+                else audio.playWrong();
+                
+                setTimeout(() => {
+                    setFeedback(null);
+                    setSelectedOption(null);
+                    if (step < questions.length - 1) {
+                        setStep(step + 1);
+                    } else {
+                        const correctCount = newAnswers.filter(a => a.correct).length;
+                        onComplete(correctCount);
+                    }
+                }, 800);
+            };
+
+            const currentQ = questions[step];
+
+            return (
+                <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+                    <div className="card-game p-6 md:p-10 max-w-lg w-full text-center">
+                        <span className="text-4xl mb-3 block">📝</span>
+                        <h2 className="text-2xl md:text-3xl text-white mb-2" style={{fontFamily: "'Fredoka One', cursive"}}>
+                            Asesmen Diagnostik Awal
+                        </h2>
+                        <p className="text-purple-200 mb-4" style={{fontFamily: "'Quicksand', sans-serif"}}>
+                            Yuk, kita cek pemahaman awalmu! Soal {step + 1} dari {questions.length}
+                        </p>
+                        
+                        <div className="progress-bar mb-5 h-3">
+                            <div className="progress-fill" style={{width: `${((step + 1) / questions.length) * 100}%`}}></div>
+                        </div>
+                        
+                        <p className="text-white text-lg font-semibold mb-5" style={{fontFamily: "'Nunito', sans-serif"}}>
+                            {currentQ.q}
+                        </p>
+                        
+                        <div className="space-y-3">
+                            {currentQ.options.map((opt, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => handleAnswer(i)}
+                                    disabled={!!feedback}
+                                    className={`option-btn w-full text-white px-5 py-3 rounded-2xl border-2 text-left transition-all ${
+                                        feedback && i === currentQ.answer ? 'correct-flash border-green-400' : 
+                                        feedback && i === selectedOption && i !== currentQ.answer ? 'wrong-flash border-red-400' :
+                                        'bg-white/10 border-white/20 hover:border-purple-400'
+                                    }`}
+                                    style={{fontFamily: "'Nunito', sans-serif"}}
+                                >
+                                    <span className="font-bold text-purple-300 mr-2">{String.fromCharCode(65 + i)}.</span> {opt}
+                                </button>
+                            ))}
+                        </div>
+                        
+                        {feedback && (
+                            <div className={`mt-4 text-2xl animate-pop ${feedback === 'correct' ? 'text-green-400' : 'text-red-400'}`}>
+                                {feedback === 'correct' ? '🎉 Benar!' : '😢 Coba lagi!'}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ==================== GAME SCREEN ====================
+        const GameScreen = ({
+            currentLevel,
+            setCurrentLevel,
+            unlockedLevels,
+            unlockLevel,
+            score,
+            addScore,
+            hearts,
+            setHearts,
+            combo,
+            xp,
+            playerLevel,
+            selectedChar,
+            badges,
+            addBadge,
+            totalCorrect,
+            totalWrong,
+            setScreen,
+            audio,
+            spawnConfetti,
+            allQuestionsData,
+            setGameHistory,
+            navigateTo,
+        }) => {
+            const [gameState, setGameState] = useState('select'); // select | playing | complete | failed
+            const [currentQ, setCurrentQ] = useState(0);
+            const [monsterHP, setMonsterHP] = useState(0);
+            const [timer, setTimer] = useState(0);
+            const [levelScore, setLevelScore] = useState(0);
+            const [levelCorrect, setLevelCorrect] = useState(0);
+            const [feedback, setFeedback] = useState(null);
+            const [fillAnswer, setFillAnswer] = useState('');
+            const [selectedOption, setSelectedOption] = useState(null);
+            const [isPaused, setIsPaused] = useState(false);
+            const [showHint, setShowHint] = useState(false);
+            const timerRef = useRef(null);
+            
+            const levelData = allQuestionsData[currentLevel];
+
+            // Timer for boss battle
+            useEffect(() => {
+                if (gameState === 'playing' && !isPaused && levelData?.bossBattle) {
+                    timerRef.current = setInterval(() => {
+                        setTimer(t => {
+                            if (t >= (levelData.timeLimit || 90)) {
+                                clearInterval(timerRef.current);
+                                setGameState('failed');
+                                return t;
+                            }
+                            return t + 1;
+                        });
+                    }, 1000);
+                }
+                return () => {
+                    if (timerRef.current) clearInterval(timerRef.current);
+                };
+            }, [gameState, isPaused, levelData]);
+
+            const startLevel = (lvl) => {
+                setCurrentLevel(lvl);
+                const data = allQuestionsData[lvl];
+                setGameState('playing');
+                setCurrentQ(0);
+                setMonsterHP(data.monsterHP);
+                setTimer(0);
+                setLevelScore(0);
+                setLevelCorrect(0);
+                setFeedback(null);
+                setFillAnswer('');
+                setSelectedOption(null);
+                setShowHint(false);
+                setIsPaused(false);
+                audio.playClick();
+            };
+
+            const handleAnswer = (isCorrect, points) => {
+                if (feedback) return;
+                
+                setFeedback(isCorrect ? 'correct' : 'wrong');
+                addScore(points, isCorrect);
+                
+                if (isCorrect) {
+                    setLevelScore(s => s + points);
+                    setLevelCorrect(c => c + 1);
+                    const newHP = monsterHP - 1;
+                    setMonsterHP(newHP);
+                    audio.playCoin();
+                }
+                
+                setTimeout(() => {
+                    setFeedback(null);
+                    setFillAnswer('');
+                    setSelectedOption(null);
+                    
+                    if (isCorrect && monsterHP - 1 <= 0) {
+                        // Level complete!
+                        setGameState('complete');
+                        if (timerRef.current) clearInterval(timerRef.current);
+                        
+                        let timeBonus = 0;
+                        if (levelData?.bossBattle) {
+                            timeBonus = Math.max(0, (levelData.timeLimit - timer) * 2);
+                            setLevelScore(s => s + timeBonus);
+                            addScore(timeBonus, true);
+                        }
+                        
+                        unlockLevel(currentLevel + 1);
+                        if (currentLevel === 1) addBadge('first_blood');
+                        if (levelCorrect + 1 === levelData.questions.length) addBadge('perfect');
+                        if (currentLevel === 6) addBadge('boss_slayer');
+                        if (currentLevel >= 6) addBadge('all_levels');
+                        
+                        spawnConfetti();
+                        audio.playVictory();
+                        
+                        setGameHistory(prev => [...prev, {
+                            level: currentLevel,
+                            score: levelScore + points + timeBonus,
+                            correct: levelCorrect + 1,
+                            time: timer,
+                            date: new Date().toISOString(),
+                        }]);
+                    } else if (currentQ < levelData.questions.length - 1) {
+                        setCurrentQ(q => q + 1);
+                    } else if (!isCorrect && hearts <= 1) {
+                        setGameState('failed');
+                        if (timerRef.current) clearInterval(timerRef.current);
+                    } else if (isCorrect && monsterHP - 1 > 0 && currentQ >= levelData.questions.length - 1) {
+                        // Reset questions but keep monster HP
+                        setCurrentQ(0);
+                    } else if (!isCorrect && currentQ >= levelData.questions.length - 1) {
+                        setGameState('failed');
+                        if (timerRef.current) clearInterval(timerRef.current);
+                    }
+                }, 700);
+            };
+
+            const handleFillSubmit = () => {
+                if (feedback || !fillAnswer.trim()) return;
+                const q = levelData.questions[currentQ];
+                const userAnswer = fillAnswer.trim().toLowerCase().replace(/\s+/g, '');
+                const correctAnswers = [
+                    q.answer.toLowerCase().replace(/\s+/g, ''),
+                    ...(q.alternatives || []).map(a => a.toLowerCase().replace(/\s+/g, ''))
+                ];
+                handleAnswer(correctAnswers.includes(userAnswer), q.points || 15);
+            };
+
+            // Level Select Screen
+            if (gameState === 'select') {
+                const levelPreviews = [
+                    { lvl: 1, title: 'Variabel & Koefisien', icon: '🌱', monster: '🐛', color: 'from-green-400 to-emerald-500' },
+                    { lvl: 2, title: 'Suku Sejenis', icon: '🌿', monster: '🦎', color: 'from-teal-400 to-cyan-500' },
+                    { lvl: 3, title: 'Penjumlahan Aljabar', icon: '🍃', monster: '🐺', color: 'from-blue-400 to-indigo-500' },
+                    { lvl: 4, title: 'Pengurangan Aljabar', icon: '🍂', monster: '🐉', color: 'from-purple-400 to-pink-500' },
+                    { lvl: 5, title: 'Perkalian Aljabar', icon: '🌳', monster: '🦂', color: 'from-orange-400 to-red-500' },
+                    { lvl: 6, title: 'BOSS BATTLE', icon: '👑', monster: '👹', color: 'from-red-500 to-yellow-500', isBoss: true },
+                ];
+
+                return (
+                    <div className="flex flex-col items-center min-h-screen px-4 py-4">
+                        {/* Header */}
+                        <div className="w-full max-w-4xl flex justify-between items-center mb-4 flex-wrap gap-3">
+                            <div className="flex items-center gap-3">
+                                <span className="text-3xl">{selectedChar?.emoji || '🧙‍♂️'}</span>
+                                <div>
+                                    <p className="text-white text-sm" style={{fontFamily: "'Fredoka One', cursive"}}>{selectedChar?.name || 'Petualang'}</p>
+                                    <p className="text-purple-300 text-xs" style={{fontFamily: "'Nunito', sans-serif"}}>Lv. {playerLevel} | XP: {xp}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4 flex-wrap">
+                                <span className="text-yellow-400 font-bold" style={{fontFamily: "'Fredoka One', cursive"}}>⭐ {score}</span>
+                                <span className="text-red-400">{'❤️'.repeat(Math.max(0, hearts))}{'🖤'.repeat(Math.max(0, 5 - hearts))}</span>
+                                <span className="text-purple-300 text-sm">🔥{combo}x</span>
+                            </div>
+                        </div>
+
+                        {/* XP Bar */}
+                        <div className="w-full max-w-4xl mb-5">
+                            <div className="flex justify-between text-white text-xs mb-1" style={{fontFamily: "'Nunito', sans-serif"}}>
+                                <span>XP Progress</span>
+                                <span>{xp % 100}/100 ke Level {playerLevel + 1}</span>
+                            </div>
+                            <div className="progress-bar h-3">
+                                <div className="progress-fill" style={{width: `${xp % 100}%`}}></div>
+                            </div>
+                        </div>
+
+                        <h2 className="text-2xl md:text-3xl text-white mb-4 text-center" style={{fontFamily: "'Fredoka One', cursive"}}>
+                            🗺️ Peta Petualangan
+                        </h2>
+
+                        {/* Level Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl w-full mb-5">
+                            {levelPreviews.map(lp => {
+                                const isUnlocked = unlockedLevels.includes(lp.lvl);
+                                return (
+                                    <div
+                                        key={lp.lvl}
+                                        onClick={() => isUnlocked && startLevel(lp.lvl)}
+                                        className={`card-game p-5 text-center transition-all relative overflow-hidden ${
+                                            isUnlocked ? 'cursor-pointer hover:scale-105' : 'opacity-50 cursor-not-allowed'
+                                        }`}
+                                    >
+                                        <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${lp.color}`}></div>
+                                        {lp.isBoss && <div className="absolute -top-1 -right-1 text-xl animate-pulse-glow">⚡</div>}
+                                        <span className="text-4xl block mb-2">{lp.icon}</span>
+                                        <span className="text-3xl block mb-1 monster-card">{lp.monster}</span>
+                                        <h3 className="text-white text-lg mb-1" style={{fontFamily: "'Fredoka One', cursive"}}>Level {lp.lvl}</h3>
+                                        <p className="text-gray-300 text-sm" style={{fontFamily: "'Nunito', sans-serif"}}>{lp.title}</p>
+                                        {!isUnlocked && <span className="text-2xl">🔒</span>}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Bottom buttons */}
+                        <div className="flex gap-3 flex-wrap justify-center">
+                            <button onClick={() => navigateTo('report')} className="btn-game bg-purple-600 hover:bg-purple-700 px-6">
+                                📊 Laporan Belajar
+                            </button>
+                            <button onClick={() => navigateTo('result')} className="btn-game btn-warning px-6">
+                                🏆 Lihat Hasil
+                            </button>
+                        </div>
+
+                        {/* Badges */}
+                        {badges.length > 0 && (
+                            <div className="max-w-4xl w-full mt-5">
+                                <h3 className="text-white text-lg mb-2 text-center" style={{fontFamily: "'Fredoka One', cursive"}}>🏅 Badge</h3>
+                                <div className="flex gap-2 flex-wrap justify-center">
+                                    {badges.map((b, i) => (
+                                        <span key={i} className="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20" title={b.desc}>
+                                            {b.icon} {b.name}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            }
+
+            // Playing screen
+            const q = levelData.questions[currentQ];
+            const timeLeft = levelData?.bossBattle ? Math.max(0, (levelData.timeLimit || 90) - timer) : null;
+
+            return (
+                <div className="flex flex-col items-center min-h-screen px-4 py-3">
+                    {/* Top bar */}
+                    <div className="w-full max-w-3xl flex justify-between items-center mb-3 flex-wrap gap-2">
+                        <button
+                            onClick={() => { setGameState('select'); if (timerRef.current) clearInterval(timerRef.current); }}
+                            className="text-white bg-white/10 px-3 py-1.5 rounded-full hover:bg-white/20 transition text-sm"
+                            style={{fontFamily: "'Nunito', sans-serif"}}
+                        >
+                            ← Kembali
+                        </button>
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <span className="text-yellow-400 text-sm font-bold" style={{fontFamily: "'Fredoka One', cursive"}}>⭐{score}</span>
+                            <span className="text-red-400 text-sm">{'❤️'.repeat(Math.max(0, hearts))}</span>
+                            <span className="text-purple-300 text-sm">🔥{combo}x</span>
+                            {timeLeft !== null && (
+                                <span className={`text-sm font-bold ${timeLeft < 20 ? 'text-red-400 animate-pulse' : 'text-orange-400'}`}>
+                                    ⏱️{timeLeft}s
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Progress */}
+                    <div className="w-full max-w-3xl mb-3">
+                        <div className="flex justify-between text-white text-xs mb-1" style={{fontFamily: "'Nunito', sans-serif"}}>
+                            <span>{levelData.title}</span>
+                            <span>Soal {currentQ + 1}/{levelData.questions.length}</span>
+                        </div>
+                        <div className="progress-bar h-2">
+                            <div className="progress-fill" style={{width: `${((currentQ + 1) / levelData.questions.length) * 100}%`}}></div>
+                        </div>
+                    </div>
+
+                    {/* Monster */}
+                    <div className="flex items-center gap-3 mb-3">
+                        <span className="text-4xl md:text-5xl monster-card">{levelData.monster}</span>
+                        <div>
+                            <p className="text-white text-base" style={{fontFamily: "'Fredoka One', cursive"}}>{levelData.monsterName}</p>
+                            <div className="flex gap-1">
+                                {Array.from({length: levelData.monsterHP}).map((_, i) => (
+                                    <span key={i} className={`text-lg ${i < monsterHP ? 'text-red-400' : 'text-gray-600'}`}>
+                                        {i < monsterHP ? '❤️' : '🖤'}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Question Card */}
+                    <div className="card-game p-5 md:p-7 max-w-3xl w-full relative">
+                        {feedback && (
+                            <div className={`absolute inset-0 flex items-center justify-center z-10 rounded-3xl ${
+                                feedback === 'correct' ? 'bg-green-500/20' : 'bg-red-500/20'
+                            } backdrop-blur-sm`}>
+                                <span className={`text-5xl animate-pop ${feedback === 'correct' ? 'text-green-300' : 'text-red-300'}`}>
+                                    {feedback === 'correct' ? '🎉 Benar!' : '😢 Salah!'}
+                                </span>
+                            </div>
+                        )}
+                        
+                        <p className="text-white text-base md:text-lg font-semibold mb-4 text-center" style={{fontFamily: "'Nunito', sans-serif"}}>
+                            {q.q}
+                        </p>
+
+                        {/* Question types */}
+                        {q.type === 'multiple' && (
+                            <div className="space-y-2.5">
+                                {q.options.map((opt, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handleAnswer(i === q.answer, q.points)}
+                                        disabled={!!feedback}
+                                        className={`option-btn w-full text-white px-4 py-3 rounded-xl border-2 text-left transition-all ${
+                                            feedback && i === q.answer ? 'correct-flash border-green-400' :
+                                            feedback && i === selectedOption && i !== q.answer ? 'wrong-flash border-red-400' :
+                                            'bg-white/10 border-white/20 hover:border-purple-400'
+                                        }`}
+                                        style={{fontFamily: "'Nunito', sans-serif"}}
+                                    >
+                                        <span className="font-bold text-purple-300 mr-2">{String.fromCharCode(65 + i)}.</span> {opt}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {q.type === 'truefalse' && (
+                            <div className="flex gap-4 justify-center">
+                                <button
+                                    onClick={() => handleAnswer(q.answer === true, q.points)}
+                                    disabled={!!feedback}
+                                    className="btn-game btn-success text-lg px-8"
+                                >
+                                    ✅ Benar
+                                </button>
+                                <button
+                                    onClick={() => handleAnswer(q.answer === false, q.points)}
+                                    disabled={!!feedback}
+                                    className="btn-game btn-danger text-lg px-8"
+                                >
+                                    ❌ Salah
+                                </button>
+                            </div>
+                        )}
+
+                        {q.type === 'fill' && (
+                            <div className="flex flex-col items-center gap-3">
+                                <input
+                                    type="text"
+                                    value={fillAnswer}
+                                    onChange={(e) => setFillAnswer(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleFillSubmit()}
+                                    placeholder="Ketik jawabanmu di sini..."
+                                    disabled={!!feedback}
+                                    className="w-full max-w-md bg-white/15 text-white px-4 py-3 rounded-xl border-2 border-white/30 focus:border-purple-400 outline-none text-center text-base"
+                                    style={{fontFamily: "'Nunito', sans-serif"}}
+                                    autoFocus
+                                />
+                                <button
+                                    onClick={handleFillSubmit}
+                                    disabled={!!feedback || !fillAnswer.trim()}
+                                    className="btn-game px-6"
+                                >
+                                    ✨ Submit Jawaban
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex gap-2 mt-3 flex-wrap justify-center">
+                        <button
+                            onClick={() => setShowHint(!showHint)}
+                            className="text-white bg-white/10 px-3 py-1.5 rounded-full hover:bg-white/20 transition text-xs"
+                            style={{fontFamily: "'Nunito', sans-serif"}}
+                        >
+                            💡 Petunjuk
+                        </button>
+                        <button
+                            onClick={() => setIsPaused(!isPaused)}
+                            className="text-white bg-white/10 px-3 py-1.5 rounded-full hover:bg-white/20 transition text-xs"
+                            style={{fontFamily: "'Nunito', sans-serif"}}
+                        >
+                            {isPaused ? '▶️ Lanjut' : '⏸️ Pause'}
+                        </button>
+                    </div>
+
+                    {showHint && (
+                        <div className="card-game p-4 max-w-3xl w-full mt-2 text-center animate-pop">
+                            <p className="text-yellow-300 text-sm" style={{fontFamily: "'Quicksand', sans-serif"}}>
+                                💡 Tips: Perhatikan baik-baik variabel dan koefisiennya! Jangan lupa tanda positif/negatif. Suku sejenis harus memiliki variabel dan pangkat yang sama.
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Pause overlay */}
+                    {isPaused && (
+                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+                            <div className="card-game p-8 text-center">
+                                <span className="text-5xl block mb-3">⏸️</span>
+                                <h3 className="text-white text-xl mb-3" style={{fontFamily: "'Fredoka One', cursive"}}>Game Dijeda</h3>
+                                <button onClick={() => setIsPaused(false)} className="btn-game">▶️ Lanjutkan</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Level Complete */}
+                    {gameState === 'complete' && (
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+                            <div className="card-game p-7 text-center max-w-md w-full animate-pop">
+                                <span className="text-6xl block mb-3">🎉</span>
+                                <h3 className="text-white text-2xl mb-2" style={{fontFamily: "'Fredoka One', cursive"}}>Level Selesai!</h3>
+                                <p className="text-purple-200 mb-3" style={{fontFamily: "'Quicksand', sans-serif"}}>
+                                    {levelData.monsterName} berhasil dikalahkan!
+                                </p>
+                                <div className="flex gap-4 justify-center text-white mb-3" style={{fontFamily: "'Nunito', sans-serif"}}>
+                                    <span>⭐ {levelScore} poin</span>
+                                    <span>✅ {levelCorrect} benar</span>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setGameState('select');
+                                        if (currentLevel < 6) setCurrentLevel(currentLevel + 1);
+                                        else navigateTo('result');
+                                    }}
+                                    className="btn-game px-6"
+                                >
+                                    {currentLevel < 6 ? '➡️ Level Selanjutnya' : '🏆 Lihat Hasil'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Level Failed */}
+                    {gameState === 'failed' && (
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+                            <div className="card-game p-7 text-center max-w-md w-full animate-shake">
+                                <span className="text-6xl block mb-3">💔</span>
+                                <h3 className="text-white text-xl mb-2" style={{fontFamily: "'Fredoka One', cursive"}}>Belum Berhasil</h3>
+                                <p className="text-purple-200 mb-4" style={{fontFamily: "'Quicksand', sans-serif"}}>
+                                    Jangan menyerah! Coba lagi ya!
+                                </p>
+                                <div className="flex flex-col gap-2">
+                                    <button
+                                        onClick={() => {
+                                            setGameState('playing');
+                                            setCurrentQ(0);
+                                            setMonsterHP(levelData.monsterHP);
+                                            setTimer(0);
+                                            setLevelScore(0);
+                                            setLevelCorrect(0);
+                                            setFeedback(null);
+                                            setFillAnswer('');
+                                            setSelectedOption(null);
+                                            setHearts(5);
+                                        }}
+                                        className="btn-game px-6"
+                                    >
+                                        🔄 Coba Lagi
+                                    </button>
+                                    <button
+                                        onClick={() => setGameState('select')}
+                                        className="btn-game btn-warning px-6"
+                                    >
+                                        ← Pilih Level Lain
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ==================== RESULT SCREEN ====================
+        const ResultScreen = ({
+            score, totalCorrect, totalWrong, badges, playerLevel, currentLevel, maxCombo,
+            selectedChar, onReplay, onHome, onExportExcel, onShareWA, addToLeaderboard,
+            leaderboard, spawnConfetti
+        }) => {
+            const [nameInput, setNameInput] = useState('');
+            const [submitted, setSubmitted] = useState(false);
+
+            useEffect(() => {
+                spawnConfetti();
+            }, []);
+
+            const getRank = () => {
+                if (score >= 300) return { title: 'Grand Master Aljabar', emoji: '👑', color: 'text-yellow-300' };
+                if (score >= 200) return { title: 'Ksatria Numerik', emoji: '🗡️', color: 'text-purple-300' };
+                if (score >= 100) return { title: 'Pelajar Hebat', emoji: '📖', color: 'text-blue-300' };
+                return { title: 'Pemula Ceria', emoji: '🌱', color: 'text-green-300' };
+            };
+            const rank = getRank();
+            const accuracy = totalCorrect + totalWrong > 0 ? Math.round((totalCorrect / (totalCorrect + totalWrong)) * 100) : 0;
+
+            return (
+                <div className="flex flex-col items-center min-h-screen px-4 py-6">
+                    <div className="card-game p-6 md:p-10 max-w-2xl w-full text-center">
+                        <span className="text-7xl block mb-3 animate-float">🏆</span>
+                        <h2 className="text-2xl md:text-4xl text-white mb-2 glow-text" style={{fontFamily: "'Fredoka One', cursive"}}>
+                            Petualangan Selesai!
+                        </h2>
+                        <p className="text-purple-200 mb-5" style={{fontFamily: "'Quicksand', sans-serif"}}>
+                            {selectedChar?.name || 'Petualang'}, kamu luar biasa!
+                        </p>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                            <div className="bg-white/10 rounded-2xl p-3">
+                                <p className="text-yellow-400 text-xl font-bold" style={{fontFamily: "'Fredoka One', cursive"}}>{score}</p>
+                                <p className="text-gray-300 text-xs">Total Skor</p>
+                            </div>
+                            <div className="bg-white/10 rounded-2xl p-3">
+                                <p className="text-green-400 text-xl font-bold" style={{fontFamily: "'Fredoka One', cursive"}}>{accuracy}%</p>
+                                <p className="text-gray-300 text-xs">Akurasi</p>
+                            </div>
+                            <div className="bg-white/10 rounded-2xl p-3">
+                                <p className="text-purple-400 text-xl font-bold" style={{fontFamily: "'Fredoka One', cursive"}}>{maxCombo}x</p>
+                                <p className="text-gray-300 text-xs">Max Combo</p>
+                            </div>
+                            <div className="bg-white/10 rounded-2xl p-3">
+                                <p className="text-pink-400 text-xl font-bold" style={{fontFamily: "'Fredoka One', cursive"}}>{badges.length}</p>
+                                <p className="text-gray-300 text-xs">Badge</p>
+                            </div>
+                        </div>
+
+                        <div className="mb-5">
+                            <p className={`text-xl font-bold ${rank.color}`} style={{fontFamily: "'Fredoka One', cursive"}}>
+                                {rank.emoji} {rank.title}
+                            </p>
+                            <p className="text-gray-400 text-sm">Level Pemain: {playerLevel}</p>
+                        </div>
+
+                        {badges.length > 0 && (
+                            <div className="mb-5">
+                                <h3 className="text-white mb-2" style={{fontFamily: "'Fredoka One', cursive"}}>🏅 Badge Diperoleh</h3>
+                                <div className="flex gap-2 flex-wrap justify-center">
+                                    {badges.map((b, i) => (
+                                        <span key={i} className="bg-white/15 text-white px-3 py-1 rounded-full text-sm border border-white/20" title={b.desc}>
+                                            {b.icon} {b.name}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {!submitted && (
+                            <div className="mb-4 flex gap-2 justify-center flex-wrap">
+                                <input
+                                    type="text"
+                                    value={nameInput}
+                                    onChange={(e) => setNameInput(e.target.value)}
+                                    placeholder="Nama untuk leaderboard..."
+                                    className="bg-white/15 text-white px-4 py-2 rounded-xl border border-white/20 outline-none text-sm"
+                                    style={{fontFamily: "'Nunito', sans-serif"}}
+                                />
+                                <button
+                                    onClick={() => { addToLeaderboard(nameInput); setSubmitted(true); }}
+                                    className="btn-game text-sm px-4"
+                                >
+                                    Simpan
+                                </button>
+                            </div>
+                        )}
+
+                        {leaderboard.length > 0 && (
+                            <div className="mb-5 text-left">
+                                <h3 className="text-white text-center mb-2" style={{fontFamily: "'Fredoka One', cursive"}}>📋 Leaderboard</h3>
+                                <div className="max-h-32 overflow-y-auto scrollbar-custom">
+                                    {leaderboard.slice(0, 5).map((entry, i) => (
+                                        <div key={i} className="flex justify-between text-white text-sm py-1.5 px-3 bg-white/5 rounded-lg mb-1">
+                                            <span>{i + 1}. {entry.name}</span>
+                                            <span>⭐ {entry.score}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex gap-2 flex-wrap justify-center">
+                            <button onClick={onReplay} className="btn-game">🔄 Main Lagi</button>
+                            <button onClick={onExportExcel} className="btn-game btn-success">📥 Export Excel</button>
+                            <button onClick={onShareWA} className="btn-game bg-green-500 hover:bg-green-600">💬 Share WA</button>
+                            <button onClick={onHome} className="btn-game btn-warning">🏠 Beranda</button>
+                        </div>
+
+                        <p className="text-purple-300 mt-5 text-sm" style={{fontFamily: "'Quicksand', sans-serif"}}>
+                            💪 "Matematika adalah petualangan yang tak pernah berakhir. Terus belajar dan berkembang!"
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==================== REPORT SCREEN ====================
+        const ReportScreen = ({
+            score, totalCorrect, totalWrong, badges, playerLevel, currentLevel,
+            maxCombo, unlockedLevels, gameHistory, onBack, onExportExcel, onShareWA
+        }) => {
+            const accuracy = totalCorrect + totalWrong > 0 ? Math.round((totalCorrect / (totalCorrect + totalWrong)) * 100) : 0;
+            const highestLevel = Math.max(...unlockedLevels, 1);
+
+            const getRecommendation = () => {
+                if (accuracy >= 90) return '🎉 Hebat! Kamu sudah menguasai aljabar dasar dengan sangat baik. Lanjutkan ke materi yang lebih menantang!';
+                if (accuracy >= 70) return '👍 Bagus! Perbanyak latihan operasi perkalian dan pemfaktoran aljabar.';
+                if (accuracy >= 50) return '📚 Cukup baik! Fokus belajar pada operasi pengurangan dan perkalian aljabar.';
+                return '💪 Semangat! Mulai dari dasar: variabel, koefisien, dan suku sejenis. Jangan menyerah!';
+            };
+
+            return (
+                <div className="flex flex-col items-center min-h-screen px-4 py-5">
+                    <div className="card-game p-6 md:p-8 max-w-3xl w-full">
+                        <div className="flex justify-between items-center mb-5">
+                            <h2 className="text-xl md:text-2xl text-white" style={{fontFamily: "'Fredoka One', cursive"}}>
+                                📊 Laporan Hasil Belajar
+                            </h2>
+                            <button
+                                onClick={onBack}
+                                className="text-white bg-white/10 px-3 py-1.5 rounded-full hover:bg-white/20 text-sm"
+                                style={{fontFamily: "'Nunito', sans-serif"}}
+                            >
+                                ← Kembali
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
+                            <div className="bg-white/10 rounded-2xl p-3 text-center">
+                                <p className="text-yellow-400 text-2xl font-bold" style={{fontFamily: "'Fredoka One', cursive"}}>{score}</p>
+                                <p className="text-gray-300 text-xs">Skor Akhir</p>
+                            </div>
+                            <div className="bg-white/10 rounded-2xl p-3 text-center">
+                                <p className="text-green-400 text-2xl font-bold" style={{fontFamily: "'Fredoka One', cursive"}}>{accuracy}%</p>
+                                <p className="text-gray-300 text-xs">Akurasi</p>
+                            </div>
+                            <div className="bg-white/10 rounded-2xl p-3 text-center">
+                                <p className="text-purple-400 text-2xl font-bold" style={{fontFamily: "'Fredoka One', cursive"}}>{highestLevel}</p>
+                                <p className="text-gray-300 text-xs">Level Tertinggi</p>
+                            </div>
+                            <div className="bg-white/10 rounded-2xl p-3 text-center">
+                                <p className="text-blue-400 text-2xl font-bold" style={{fontFamily: "'Fredoka One', cursive"}}>{playerLevel}</p>
+                                <p className="text-gray-300 text-xs">Player Level</p>
+                            </div>
+                            <div className="bg-white/10 rounded-2xl p-3 text-center">
+                                <p className="text-orange-400 text-2xl font-bold" style={{fontFamily: "'Fredoka One', cursive"}}>{maxCombo}x</p>
+                                <p className="text-gray-300 text-xs">Max Combo</p>
+                            </div>
+                            <div className="bg-white/10 rounded-2xl p-3 text-center">
+                                <p className="text-pink-400 text-2xl font-bold" style={{fontFamily: "'Fredoka One', cursive"}}>{badges.length}</p>
+                                <p className="text-gray-300 text-xs">Badge</p>
+                            </div>
+                        </div>
+
+                        <div className="mb-5">
+                            <h3 className="text-white mb-2" style={{fontFamily: "'Fredoka One', cursive"}}>📈 Perbandingan Jawaban</h3>
+                            <div className="flex h-8 rounded-full overflow-hidden">
+                                {totalCorrect + totalWrong > 0 ? (
+                                    <>
+                                        <div className="bg-green-500 flex items-center justify-center text-xs font-bold text-white" style={{width: `${accuracy}%`}}>
+                                            {accuracy > 20 ? `✅ ${totalCorrect}` : ''}
+                                        </div>
+                                        <div className="bg-red-500 flex items-center justify-center text-xs font-bold text-white" style={{width: `${100-accuracy}%`}}>
+                                            {(100-accuracy) > 20 ? `❌ ${totalWrong}` : ''}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="bg-gray-600 w-full flex items-center justify-center text-xs text-white">
+                                        Belum ada data
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {gameHistory.length > 0 && (
+                            <div className="mb-5">
+                                <h3 className="text-white mb-2" style={{fontFamily: "'Fredoka One', cursive"}}>📜 Riwayat Level</h3>
+                                <div className="space-y-1.5 max-h-36 overflow-y-auto scrollbar-custom">
+                                    {gameHistory.map((h, i) => (
+                                        <div key={i} className="bg-white/5 rounded-xl p-2.5 flex justify-between text-sm">
+                                            <span className="text-white">Level {h.level}</span>
+                                            <span className="text-yellow-400">⭐{h.score}</span>
+                                            <span className="text-green-400">✅{h.correct}</span>
+                                            <span className="text-gray-400">{new Date(h.date).toLocaleDateString('id-ID')}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="bg-purple-500/20 border border-purple-400/30 rounded-2xl p-4 mb-5">
+                            <h3 className="text-white mb-2" style={{fontFamily: "'Fredoka One', cursive"}}>💡 Rekomendasi Belajar</h3>
+                            <p className="text-purple-200 text-sm" style={{fontFamily: "'Nunito', sans-serif"}}>{getRecommendation()}</p>
+                        </div>
+
+                        <div className="flex gap-2 flex-wrap justify-center">
+                            <button onClick={onExportExcel} className="btn-game btn-success">📥 Export Excel</button>
+                            <button onClick={onShareWA} className="btn-game bg-green-500 hover:bg-green-600">💬 Kirim WA</button>
+                            <button onClick={() => window.print()} className="btn-game bg-blue-500 hover:bg-blue-600">🖨️ Cetak</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==================== RENDER APP ====================
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
