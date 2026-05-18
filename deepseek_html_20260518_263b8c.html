@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan PLSV - Game Edukasi Matematika</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+    </script>
+    <style>
+        :root {
+            --biru: #2196F3;
+            --biru-muda: #64B5F6;
+            --hijau: #4CAF50;
+            --hijau-muda: #81C784;
+            --kuning: #FFC107;
+            --kuning-muda: #FFD54F;
+            --putih: #FFFFFF;
+            --abu-muda: #F5F5F5;
+            --abu: #9E9E9E;
+            --merah: #f44336;
+            --orange: #FF9800;
+            --ungu: #9C27B0;
+            --shadow: 0 4px 20px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.2);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 30%, #C8E6C9 70%, #FFF9C4 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating math symbols background */
+        .bg-math-symbols {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.06;
+            font-size: 40px;
+            font-weight: bold;
+            overflow: hidden;
+        }
+
+        .bg-math-symbols span {
+            position: absolute;
+            animation: floatSymbol 15s infinite linear;
+            color: #2196F3;
+        }
+
+        @keyframes floatSymbol {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* Main Container */
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 1;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 800px;
+                margin: 20px auto;
+                min-height: calc(100vh - 40px);
+                border-radius: 24px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .app-container {
+                max-width: 1000px;
+            }
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, var(--biru), #1976D2);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        @media (min-width: 768px) {
+            .app-header {
+                border-radius: 24px 24px 0 0;
+            }
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .app-logo .icon {
+            font-size: 28px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .hamburger:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Sidebar */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            display: none;
+            transition: var(--transition);
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100%;
+            background: white;
+            z-index: 201;
+            transition: var(--transition);
+            box-shadow: var(--shadow-lg);
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--biru), #1976D2);
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-header .avatar {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-menu li {
+            padding: 0;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 24px;
+            color: #333;
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 15px;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            background: #E3F2FD;
+            color: var(--biru);
+            border-left-color: var(--biru);
+            font-weight: 600;
+        }
+
+        .sidebar-menu li a .menu-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* Page Container */
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-accent {
+            border-left: 5px solid var(--biru);
+        }
+
+        .card-green {
+            border-left: 5px solid var(--hijau);
+        }
+
+        .card-yellow {
+            border-left: 5px solid var(--kuning);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--biru), #1976D2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(33,150,243,0.4);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(33,150,243,0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--hijau), #388E3C);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76,175,80,0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--kuning), #FFA000);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(255,193,7,0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--merah), #D32F2F);
+            color: white;
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--biru);
+            border: 2px solid var(--biru);
+        }
+
+        .btn-outline:hover {
+            background: #E3F2FD;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .btn-lg {
+            padding: 16px 32px;
+            font-size: 18px;
+        }
+
+        .btn-block {
+            display: flex;
+            width: 100%;
+        }
+
+        /* Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .menu-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .menu-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .menu-item {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--biru);
+        }
+
+        .menu-item .icon {
+            font-size: 40px;
+        }
+
+        .menu-item .label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E0E0E0;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            transition: var(--transition);
+            background: #FAFAFA;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--biru);
+            box-shadow: 0 0 0 3px rgba(33,150,243,0.1);
+            background: white;
+        }
+
+        /* Level Cards */
+        .level-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .level-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .level-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        .level-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--biru);
+        }
+
+        .level-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            filter: grayscale(30%);
+        }
+
+        .level-card .level-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--biru);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .level-card.level-1 { border-top: 4px solid #2196F3; }
+        .level-card.level-2 { border-top: 4px solid #4CAF50; }
+        .level-card.level-3 { border-top: 4px solid #FF9800; }
+        .level-card.level-4 { border-top: 4px solid #9C27B0; }
+
+        /* Game Area */
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: white;
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            flex: 1;
+            min-width: 70px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--biru);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .stat-item.nyawa .stat-value { color: var(--merah); }
+        .stat-item.timer .stat-value { color: var(--orange); }
+        .stat-item.skor .stat-value { color: var(--hijau); }
+
+        /* Progress Bar */
+        .progress-container {
+            background: #E0E0E0;
+            border-radius: 10px;
+            height: 12px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--hijau), var(--biru));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        /* Question */
+        .question-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin: 16px 0;
+        }
+
+        .question-number {
+            display: inline-block;
+            background: var(--biru);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .question-text {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-item {
+            padding: 14px 18px;
+            border: 2px solid #E0E0E0;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #FAFAFA;
+        }
+
+        .option-item:hover {
+            background: #E3F2FD;
+            border-color: var(--biru);
+        }
+
+        .option-item.selected {
+            background: #E3F2FD;
+            border-color: var(--biru);
+            font-weight: 600;
+        }
+
+        .option-item.correct {
+            background: #E8F5E9;
+            border-color: var(--hijau);
+            color: #2E7D32;
+        }
+
+        .option-item.wrong {
+            background: #FFEBEE;
+            border-color: var(--merah);
+            color: #C62828;
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #E0E0E0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* Feedback */
+        .feedback-box {
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            margin: 12px 0;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-box.benar {
+            background: #E8F5E9;
+            color: #2E7D32;
+            border: 2px solid #4CAF50;
+        }
+
+        .feedback-box.salah {
+            background: #FFEBEE;
+            color: #C62828;
+            border: 2px solid #f44336;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        table th {
+            background: var(--biru);
+            color: white;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #E0E0E0;
+        }
+
+        table tr:hover {
+            background: #F5F5F5;
+        }
+
+        table tr:nth-child(even) {
+            background: #FAFAFA;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-success { background: #E8F5E9; color: #2E7D32; }
+        .badge-warning { background: #FFF3E0; color: #E65100; }
+        .badge-danger { background: #FFEBEE; color: #C62828; }
+        .badge-info { background: #E3F2FD; color: #1565C0; }
+
+        /* Timer alert */
+        .timer-warning {
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.5; }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal h3 {
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        /* Leaderboard */
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 8px;
+            background: #FAFAFA;
+        }
+
+        .leaderboard-rank {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .rank-1 { background: #FFD700; color: #333; }
+        .rank-2 { background: #C0C0C0; color: #333; }
+        .rank-3 { background: #CD7F32; color: white; }
+        .rank-other { background: #E0E0E0; color: #666; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            z-index: 400;
+            animation: slideUp 0.3s ease;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .game-stats {
+                gap: 6px;
+            }
+            .stat-item {
+                padding: 8px 10px;
+            }
+            .stat-value {
+                font-size: 18px;
+            }
+            .question-text {
+                font-size: 15px;
+            }
+            .btn {
+                padding: 10px 18px;
+                font-size: 14px;
+            }
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .menu-item {
+                padding: 15px 10px;
+            }
+            .menu-item .icon {
+                font-size: 30px;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .app-header, .sidebar, .sidebar-overlay, .btn, .hamburger {
+                display: none !important;
+            }
+            .app-container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Math Symbols -->
+    <div class="bg-math-symbols" id="bgSymbols"></div>
+
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+            <div class="app-logo">
+                <span class="icon">🧮</span>
+                <span>Petualangan PLSV</span>
+            </div>
+            <div style="width:40px;"></div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Home Page -->
+            <div class="page active" id="page-home">
+                <div style="text-align:center; margin-bottom:20px;">
+                    <div style="font-size:60px; animation: bounce 2s infinite;">🎯</div>
+                    <h2 style="color:#333; margin:10px 0;">Selamat Datang!</h2>
+                    <p style="color:#666;">Belajar Persamaan Linear Satu Variabel jadi seru!</p>
+                </div>
+
+                <div class="menu-grid">
+                    <div class="menu-item" onclick="navigateTo('login')">
+                        <span class="icon">🎮</span>
+                        <span class="label">Mulai Game</span>
+                    </div>
+                    <div class="menu-item" onclick="navigateTo('materi')">
+                        <span class="icon">📚</span>
+                        <span class="label">Materi</span>
+                    </div>
+                    <div class="menu-item" onclick="navigateTo('latihan')">
+                        <span class="icon">✏️</span>
+                        <span class="label">Latihan Soal</span>
+                    </div>
+                    <div class="menu-item" onclick="navigateTo('asesmen')">
+                        <span class="icon">📝</span>
+                        <span class="label">Asesmen</span>
+                    </div>
+                    <div class="menu-item" onclick="navigateTo('nilai')">
+                        <span class="icon">📊</span>
+                        <span class="label">Nilai Siswa</span>
+                    </div>
+                    <div class="menu-item" onclick="exportToExcel()">
+                        <span class="icon">📥</span>
+                        <span class="label">Ekspor Excel</span>
+                    </div>
+                    <div class="menu-item" onclick="navigateTo('petunjuk')">
+                        <span class="icon">📖</span>
+                        <span class="label">Petunjuk</span>
+                    </div>
+                    <div class="menu-item" onclick="navigateTo('profil')">
+                        <span class="icon">👨‍💻</span>
+                        <span class="label">Profil Pengembang</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Page -->
+            <div class="page" id="page-login">
+                <div class="card">
+                    <div class="card-title">🔑 Data Diri Siswa</div>
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap</label>
+                        <input type="text" class="form-input" id="inputNama" placeholder="Masukkan nama kamu">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Kelas</label>
+                        <input type="text" class="form-input" id="inputKelas" placeholder="Contoh: 8A">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nomor Absen</label>
+                        <input type="number" class="form-input" id="inputAbsen" placeholder="Contoh: 15" min="1" max="40">
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="loginSiswa()">🎮 Mulai Petualangan!</button>
+                </div>
+            </div>
+
+            <!-- Level Selection Page -->
+            <div class="page" id="page-levels">
+                <div class="card">
+                    <div class="card-title">🗺️ Pilih Level Petualangan</div>
+                    <p style="color:#666; margin-bottom:16px;">
+                        Halo, <strong id="displayNama">-</strong>! Selesaikan level secara berurutan.
+                    </p>
+                </div>
+                <div class="level-grid" id="levelGrid">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+
+            <!-- Game Play Page -->
+            <div class="page" id="page-game">
+                <div class="game-stats">
+                    <div class="stat-item skor">
+                        <div class="stat-value" id="gameSkor">0</div>
+                        <div class="stat-label">Skor</div>
+                    </div>
+                    <div class="stat-item nyawa">
+                        <div class="stat-value" id="gameNyawa">❤️❤️❤️</div>
+                        <div class="stat-label">Nyawa</div>
+                    </div>
+                    <div class="stat-item timer">
+                        <div class="stat-value" id="gameTimer">0</div>
+                        <div class="stat-label">Detik</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="gameProgress">1/5</div>
+                        <div class="stat-label">Soal</div>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="gameProgressBar"></div>
+                </div>
+                <div id="gameQuestionArea">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+
+            <!-- Materi Page -->
+            <div class="page" id="page-materi">
+                <div class="card card-accent">
+                    <div class="card-title">📚 Materi Persamaan Linear Satu Variabel (PLSV)</div>
+                </div>
+                <div class="card">
+                    <h3 style="color:var(--biru);">1. Pengertian PLSV</h3>
+                    <p>Persamaan Linear Satu Variabel adalah kalimat terbuka yang dihubungkan oleh tanda sama dengan (=) dan hanya memiliki <strong>satu variabel</strong> berpangkat <strong>satu</strong>.</p>
+                    <p style="background:#E3F2FD; padding:10px; border-radius:8px; margin:10px 0;">
+                        <strong>Bentuk Umum:</strong> ax + b = c<br>
+                        Dimana a, b, c adalah konstanta dan x adalah variabel.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 style="color:var(--hijau);">2. Contoh PLSV</h3>
+                    <p>✅ 2x + 3 = 7 (PLSV)</p>
+                    <p>✅ 5y - 10 = 0 (PLSV)</p>
+                    <p>❌ x² + 2 = 6 (Bukan PLSV, pangkat 2)</p>
+                    <p>❌ 2x + y = 8 (Bukan PLSV, dua variabel)</p>
+                </div>
+                <div class="card card-green">
+                    <h3 style="color:var(--hijau);">3. Langkah Penyelesaian</h3>
+                    <ol style="padding-left:20px; line-height:2;">
+                        <li>Tuliskan persamaan dengan rapi</li>
+                        <li>Kelompokkan suku yang memiliki variabel di satu ruas</li>
+                        <li>Kelompokkan konstanta di ruas lainnya</li>
+                        <li>Lakukan operasi hitung yang sesuai</li>
+                        <li>Tentukan nilai variabel</li>
+                        <li>Periksa kembali jawaban</li>
+                    </ol>
+                </div>
+                <div class="card card-yellow">
+                    <h3 style="color:#E65100;">4. Contoh Soal & Pembahasan</h3>
+                    <p><strong>Soal:</strong> Tentukan nilai x dari 3x + 5 = 20</p>
+                    <p><strong>Penyelesaian:</strong></p>
+                    <p>3x + 5 = 20</p>
+                    <p>3x = 20 - 5</p>
+                    <p>3x = 15</p>
+                    <p>x = 15 ÷ 3</p>
+                    <p><strong>x = 5</strong> ✅</p>
+                </div>
+            </div>
+
+            <!-- Latihan Page -->
+            <div class="page" id="page-latihan">
+                <div class="card">
+                    <div class="card-title">✏️ Latihan Soal PLSV</div>
+                    <p style="color:#666;">Kerjakan soal latihan berikut untuk mengasah kemampuanmu!</p>
+                </div>
+                <div id="latihanArea">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+
+            <!-- Asesmen Page -->
+            <div class="page" id="page-asesmen">
+                <div class="card card-accent">
+                    <div class="card-title">📝 Asesmen PLSV</div>
+                    <p style="color:#666;">10 soal evaluasi untuk mengukur pemahamanmu.</p>
+                </div>
+                <div id="asesmenArea">
+                    <button class="btn btn-primary btn-block btn-lg" onclick="mulaiAsesmen()">📝 Mulai Asesmen</button>
+                </div>
+            </div>
+
+            <!-- Nilai Page -->
+            <div class="page" id="page-nilai">
+                <div class="card">
+                    <div class="card-title">📊 Daftar Nilai Siswa</div>
+                    <div class="table-container" id="tabelNilai">
+                        <!-- Generated by JS -->
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="resetNilai()" style="margin-top:10px;">🔄 Reset Semua Nilai</button>
+                </div>
+                <div class="card card-yellow">
+                    <div class="card-title">🏆 Leaderboard</div>
+                    <div id="leaderboardArea">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Petunjuk Page -->
+            <div class="page" id="page-petunjuk">
+                <div class="card">
+                    <div class="card-title">📖 Petunjuk Penggunaan</div>
+                    <ol style="padding-left:20px; line-height:2.2;">
+                        <li>Isi data diri di menu <strong>Mulai Game</strong></li>
+                        <li>Pilih level yang ingin dimainkan (harus berurutan)</li>
+                        <li>Jawab soal dengan memilih opsi yang tersedia</li>
+                        <li>Kumpulkan skor setinggi mungkin</li>
+                        <li>Kerjakan <strong>Asesmen</strong> untuk evaluasi</li>
+                        <li>Lihat nilai di menu <strong>Nilai Siswa</strong></li>
+                        <li>Guru dapat mengunduh nilai via <strong>Ekspor Excel</strong></li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Profil Page -->
+            <div class="page" id="page-profil">
+                <div class="card" style="text-align:center;">
+                    <div style="font-size:80px;">👨‍💻</div>
+                    <h2>Profil Pengembang</h2>
+                    <p><strong>Game Edukasi: Petualangan PLSV</strong></p>
+                    <p>Dikembangkan untuk membantu siswa kelas 8 SMP belajar Persamaan Linear Satu Variabel dengan cara yang menyenangkan.</p>
+                    <hr style="margin:16px 0;">
+                    <p>📧 Email: developer@plsvgame.id</p>
+                    <p>🏫 Institusi: SMP Negeri Indonesia</p>
+                    <p>🛠️ Teknologi: HTML5, CSS3, JavaScript, SheetJS</p>
+                    <p>📅 Versi: 1.0.0</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="avatar">🧮</div>
+            <div style="font-weight:700;">Petualangan PLSV</div>
+            <div style="font-size:12px; opacity:0.9;">Game Edukasi Matematika</div>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="#" onclick="navigateTo('home'); toggleSidebar();" class="active" data-page="home"><span class="menu-icon">🏠</span> Beranda</a></li>
+            <li><a href="#" onclick="navigateTo('login'); toggleSidebar();" data-page="login"><span class="menu-icon">🎮</span> Mulai Game</a></li>
+            <li><a href="#" onclick="navigateTo('materi'); toggleSidebar();" data-page="materi"><span class="menu-icon">📚</span> Materi</a></li>
+            <li><a href="#" onclick="navigateTo('latihan'); toggleSidebar();" data-page="latihan"><span class="menu-icon">✏️</span> Latihan Soal</a></li>
+            <li><a href="#" onclick="navigateTo('asesmen'); toggleSidebar();" data-page="asesmen"><span class="menu-icon">📝</span> Asesmen</a></li>
+            <li><a href="#" onclick="navigateTo('nilai'); toggleSidebar();" data-page="nilai"><span class="menu-icon">📊</span> Nilai Siswa</a></li>
+            <li><a href="#" onclick="exportToExcel(); toggleSidebar();"><span class="menu-icon">📥</span> Ekspor Excel</a></li>
+            <li><a href="#" onclick="navigateTo('petunjuk'); toggleSidebar();" data-page="petunjuk"><span class="menu-icon">📖</span> Petunjuk</a></li>
+            <li><a href="#" onclick="navigateTo('profil'); toggleSidebar();" data-page="profil"><span class="menu-icon">👨‍💻</span> Profil Pengembang</a></li>
+        </ul>
+    </nav>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalContent"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <script>
+        // ==================== APP STATE ====================
+        const APP = {
+            currentPage: 'home',
+            studentData: null,
+            currentLevel: null,
+            gameState: null,
+            unlockedLevels: 1,
+            scores: JSON.parse(localStorage.getItem('plsv_scores') || '[]'),
+            asesmenState: null
+        };
+
+        // ==================== QUESTION BANKS ====================
+        const levelQuestions = {
+            1: [
+                { q: 'Manakah yang merupakan PLSV?', opts: ['2x + 3 = 7', 'x² + 2 = 6', '2x + y = 8', 'x + y + z = 5'],
+                    correct: 0, points: 10 },
+                { q: 'Variabel dari persamaan 5x + 2 = 12 adalah...', opts: ['5', '2', 'x', '12'], correct: 2,
+                points: 10 },
+                { q: 'Nilai x dari x + 3 = 8 adalah...', opts: ['3', '5', '8', '11'], correct: 1, points: 10 },
+                { q: 'Bentuk sederhana dari 2x + 3x adalah...', opts: ['5x', '6x', '5x²', '6x²'], correct: 0,
+                    points: 10 },
+                { q: 'Konstanta dari 4x + 7 = 15 adalah...', opts: ['4 dan 7', '7 dan 15', '4 dan 15', '7 saja'],
+                    correct: 1, points: 10 }
+            ],
+            2: [
+                { q: 'Nilai x dari 2x + 5 = 11 adalah...', opts: ['2', '3', '4', '6'], correct: 1, points: 15 },
+                { q: 'Hasil dari 3x - 7 = 2x + 3, nilai x = ...', opts: ['4', '5', '10', '-4'], correct: 2,
+                points: 15 },
+                { q: 'Jika 4(x - 2) = 12, maka x = ...', opts: ['3', '4', '5', '6'], correct: 2, points: 15 },
+                { q: 'Nilai y dari 5y + 3 = 2y + 12 adalah...', opts: ['2', '3', '4', '5'], correct: 1, points: 15 },
+                { q: 'Penyelesaian 6x + 2 = 4x + 10 adalah...', opts: ['2', '3', '4', '5'], correct: 2, points: 15 }
+            ],
+            3: [
+                { q: 'Budi membeli 3 buku dan 1 pensil seharga Rp17.000. Jika pensil Rp2.000, harga 1 buku adalah...',
+                    opts: ['Rp3.000', 'Rp4.000', 'Rp5.000', 'Rp6.000'], correct: 2, points: 20 },
+                { q: 'Umur Ani 5 tahun lebih tua dari Budi. Jumlah umur mereka 25 tahun. Umur Budi = ...', opts: [
+                        '8 tahun', '10 tahun', '12 tahun', '15 tahun'
+                    ], correct: 1, points: 20 },
+                { q: 'Keliling persegi panjang 30 cm. Panjangnya 2 kali lebar. Lebarnya = ...', opts: ['4 cm', '5 cm',
+                        '6 cm', '7 cm'
+                    ], correct: 1, points: 20 },
+                { q: 'Jumlah dua bilangan 28. Bilangan pertama 4 lebih besar. Bilangan kedua = ...', opts: ['10', '12',
+                        '14', '16'
+                    ], correct: 1, points: 20 },
+                { q: 'Harga 2 kg apel dan 1 kg jeruk Rp35.000. Jeruk Rp5.000/kg. Harga apel/kg = ...', opts: [
+                        'Rp12.000', 'Rp13.000', 'Rp14.000', 'Rp15.000'
+                    ], correct: 3, points: 20 }
+            ],
+            4: [
+                { q: 'Jika 2(3x - 1) + 4 = 3(x + 2) - 1, maka nilai x = ...', opts: ['1', '2', '3', '4'], correct: 1,
+                    points: 25, timer: 20 },
+                { q: 'Sebuah bilangan jika dikali 3 lalu dikurangi 5 hasilnya 16. Bilangan itu = ...', opts: ['5', '6',
+                        '7', '8'
+                    ], correct: 2, points: 25, timer: 15 },
+                { q: 'Nilai x dari (x+2)/3 = (x-1)/2 adalah...', opts: ['5', '6', '7', '8'], correct: 2, points: 25,
+                    timer: 20 },
+                { q: 'Tiga kali suatu bilangan ditambah 7 sama dengan dua kali bilangan itu ditambah 13. Bilangan itu = ...',
+                    opts: ['4', '5', '6', '7'], correct: 2, points: 25, timer: 15 },
+                { q: 'Jika 5x - 3 = 2x + 9, maka 2x + 1 = ...', opts: ['7', '8', '9', '10'], correct: 2, points: 25,
+                    timer: 20 }
+            ]
+        };
+
+        const asesmenQuestions = [
+            { q: 'Bentuk umum PLSV adalah...', opts: ['ax² + b = c', 'ax + b = c', 'a/x + b = c', 'ax + by = c'],
+                correct: 1 },
+            { q: 'Nilai x dari 4x + 8 = 20 adalah...', opts: ['2', '3', '4', '5'], correct: 1 },
+            { q: 'Variabel dari 7y - 3 = 18 adalah...', opts: ['7', '3', 'y', '18'], correct: 2 },
+            { q: 'Penyelesaian 3x - 5 = 2x + 1 adalah...', opts: ['4', '5', '6', '7'], correct: 2 },
+            { q: 'Jika 2(x + 3) = 14, maka x = ...', opts: ['3', '4', '5', '6'], correct: 1 },
+            { q: 'Jumlah 3 bilangan genap berurutan 36. Bilangan tengah = ...', opts: ['10', '12', '14', '16'],
+            correct: 1 },
+            { q: 'Nilai a dari 5a - 7 = 3a + 9 adalah...', opts: ['6', '7', '8', '9'], correct: 2 },
+            { q: 'Umur ayah 3 kali umur anak. Jumlah umur 48. Umur anak = ...', opts: ['10', '12', '14', '16'],
+                correct: 1 },
+            { q: 'Harga 4 buku Rp20.000. Harga 7 buku = ...', opts: ['Rp30.000', 'Rp32.000', 'Rp35.000', 'Rp38.000'],
+                correct: 2 },
+            { q: 'Nilai x dari (x-1)/2 + (x+1)/3 = 4 adalah...', opts: ['4', '5', '6', '7'], correct: 1 }
+        ];
+
+        const latihanQuestions = [
+            { q: 'Nilai x dari x + 7 = 12', opts: ['4', '5', '6', '7'], correct: 1, pembahasan: 'x + 7 = 12 → x = 12 - 7 → x = 5' },
+            { q: '2x + 4 = 10, nilai x = ...', opts: ['2', '3', '4', '5'], correct: 1, pembahasan: '2x + 4 = 10 → 2x = 6 → x = 3' },
+            { q: '3x - 2 = x + 8, nilai x = ...', opts: ['4', '5', '6', '7'], correct: 1, pembahasan: '3x - x = 8 + 2 → 2x = 10 → x = 5' },
+        ];
+
+        // ==================== NAVIGATION ====================
+        function navigateTo(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const targetPage = document.getElementById('page-' + pageName);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                APP.currentPage = pageName;
+                // Scroll to top
+                document.getElementById('mainContent').scrollTop = 0;
+                // Update sidebar active
+                document.querySelectorAll('.sidebar-menu li a').forEach(a => a.classList.remove('active'));
+                const activeLink = document.querySelector(`.sidebar-menu li a[data-page="${pageName}"]`);
+                if (activeLink) activeLink.classList.add('active');
+                // Special page init
+                if (pageName === 'levels' && APP.studentData) renderLevels();
+                if (pageName === 'nilai') renderNilai();
+                if (pageName === 'latihan') renderLatihan();
+                if (pageName === 'asesmen') renderAsesmenPage();
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        // ==================== TOAST ====================
+        function showToast(message, duration = 3000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // ==================== MODAL ====================
+        function showModal(content) {
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ==================== LOGIN ====================
+        function loginSiswa() {
+            const nama = document.getElementById('inputNama').value.trim();
+            const kelas = document.getElementById('inputKelas').value.trim();
+            const absen = document.getElementById('inputAbsen').value.trim();
+
+            if (!nama || !kelas || !absen) {
+                showToast('⚠️ Mohon isi semua data!');
+                return;
+            }
+
+            APP.studentData = { nama, kelas, absen, loginTime: new Date().toISOString() };
+            localStorage.setItem('plsv_current_student', JSON.stringify(APP.studentData));
+            document.getElementById('displayNama').textContent = nama;
+            showToast('✅ Selamat datang, ' + nama + '!');
+            navigateTo('levels');
+        }
+
+        // Load saved student
+        const savedStudent = localStorage.getItem('plsv_current_student');
+        if (savedStudent) {
+            APP.studentData = JSON.parse(savedStudent);
+            APP.unlockedLevels = parseInt(localStorage.getItem('plsv_unlocked_' + APP.studentData.absen) || '1');
+        }
+
+        // ==================== LEVELS ====================
+        function renderLevels() {
+            const grid = document.getElementById('levelGrid');
+            const levelNames = ['Dasar PLSV', 'Operasi PLSV', 'Soal Cerita', 'Boss Challenge'];
+            const levelIcons = ['🌱', '🌿', '🌳', '👑'];
+            const levelColors = ['level-1', 'level-2', 'level-3', 'level-4'];
+            const levelBgs = ['Kelas Sekolah', 'Lab Matematika', 'Kota Petualangan', 'Ruang Tantangan Akhir'];
+
+            grid.innerHTML = '';
+            for (let i = 1; i <= 4; i++) {
+                const unlocked = i <= APP.unlockedLevels;
+                const card = document.createElement('div');
+                card.className = `level-card ${levelColors[i-1]} ${!unlocked ? 'locked' : ''}`;
+                card.innerHTML = `
+                    <div class="level-badge">Level ${i}</div>
+                    <div style="font-size:50px; text-align:center; margin:10px 0;">${levelIcons[i-1]}</div>
+                    <h3>${levelNames[i-1]}</h3>
+                    <p style="color:#666; font-size:13px;">🏫 ${levelBgs[i-1]}</p>
+                    <p style="color:#888; font-size:12px;">5 Soal • ${i===4?'⏱️ Timer':'📝'} • ${[10,15,20,25][i-1]} poin/soal</p>
+                    ${!unlocked ? '<p style="color:var(--merah); font-size:12px;">🔒 Selesaikan level sebelumnya</p>' : ''}
+                `;
+                if (unlocked) {
+                    card.onclick = () => mulaiLevel(i);
+                }
+                grid.appendChild(card);
+            }
+        }
+
+        function mulaiLevel(level) {
+            if (level > APP.unlockedLevels) {
+                showToast('🔒 Selesaikan level sebelumnya!');
+                return;
+            }
+            if (!APP.studentData) {
+                showToast('⚠️ Isi data diri dulu!');
+                navigateTo('login');
+                return;
+            }
+            APP.currentLevel = level;
+            APP.gameState = {
+                level: level,
+                currentQuestion: 0,
+                totalQuestions: 5,
+                score: 0,
+                nyawa: 3,
+                correctCount: 0,
+                wrongCount: 0,
+                startTime: Date.now(),
+                timer: 0,
+                timerInterval: null,
+                answered: false,
+                questions: [...levelQuestions[level]]
+            };
+            // Shuffle questions
+            shuffleArray(APP.gameState.questions);
+            navigateTo('game');
+            renderGame();
+            startTimer();
+        }
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        }
+
+        // ==================== GAME ====================
+        function startTimer() {
+            APP.gameState.timer = 0;
+            APP.gameState.timerInterval = setInterval(() => {
+                APP.gameState.timer++;
+                document.getElementById('gameTimer').textContent = APP.gameState.timer;
+                // Timer warning for level 4
+                const q = APP.gameState.questions[APP.gameState.currentQuestion];
+                if (q.timer && APP.gameState.timer >= q.timer && !APP.gameState.answered) {
+                    document.getElementById('gameTimer').classList.add('timer-warning');
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (APP.gameState.timerInterval) {
+                clearInterval(APP.gameState.timerInterval);
+                APP.gameState.timerInterval = null;
+            }
+            document.getElementById('gameTimer').classList.remove('timer-warning');
+        }
+
+        function renderGame() {
+            const state = APP.gameState;
+            if (state.currentQuestion >= state.totalQuestions || state.nyawa <= 0) {
+                endGame();
+                return;
+            }
+
+            document.getElementById('gameSkor').textContent = state.score;
+            document.getElementById('gameNyawa').textContent = '❤️'.repeat(state.nyawa) + '🖤'.repeat(3 - state.nyawa);
+            document.getElementById('gameProgress').textContent = `${state.currentQuestion + 1}/${state.totalQuestions}`;
+            document.getElementById('gameProgressBar').style.width = `${(state.currentQuestion / state.totalQuestions) * 100}%`;
+
+            const q = state.questions[state.currentQuestion];
+            const letters = ['A', 'B', 'C', 'D'];
+            let html = `
+                <div class="question-card">
+                    <div class="question-number">Soal ${state.currentQuestion + 1} dari ${state.totalQuestions}</div>
+                    <div class="question-text">${q.q}</div>
+                    ${q.timer ? `<p style="color:var(--orange); font-size:12px;">⏱️ Waktu target: ${q.timer} detik</p>` : ''}
+                    <div class="options-list">
+            `;
+            q.opts.forEach((opt, i) => {
+                html += `
+                    <div class="option-item" onclick="jawabSoal(${i})" id="opt-${i}">
+                        <span class="option-letter">${letters[i]}</span>
+                        ${opt}
+                    </div>
+                `;
+            });
+            html += '</div></div>';
+            document.getElementById('gameQuestionArea').innerHTML = html;
+            APP.gameState.answered = false;
+            document.getElementById('gameTimer').classList.remove('timer-warning');
+        }
+
+        function jawabSoal(selectedIndex) {
+            if (APP.gameState.answered) return;
+            APP.gameState.answered = true;
+
+            const q = APP.gameState.questions[APP.gameState.currentQuestion];
+            const isCorrect = selectedIndex === q.correct;
+            let pointsEarned = 0;
+
+            // Mark options
+            document.querySelectorAll('.option-item').forEach((el, i) => {
+                el.style.pointerEvents = 'none';
+                if (i === q.correct) el.classList.add('correct');
+                if (i === selectedIndex && !isCorrect) el.classList.add('wrong');
+                if (i === selectedIndex && isCorrect) el.classList.add('selected');
+            });
+
+            if (isCorrect) {
+                pointsEarned = q.points;
+                // Bonus for fast answer in level 4
+                if (q.timer && APP.gameState.timer <= q.timer) {
+                    pointsEarned += 5;
+                }
+                APP.gameState.score += pointsEarned;
+                APP.gameState.correctCount++;
+                document.getElementById('gameSkor').textContent = APP.gameState.score;
+                playSound('correct');
+            } else {
+                APP.gameState.nyawa--;
+                APP.gameState.wrongCount++;
+                document.getElementById('gameNyawa').textContent = '❤️'.repeat(APP.gameState.nyawa) + '🖤'.repeat(3 -
+                    APP.gameState.nyawa);
+                playSound('wrong');
+            }
+
+            // Show feedback
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = `feedback-box ${isCorrect ? 'benar' : 'salah'}`;
+            feedbackDiv.textContent = isCorrect ?
+                `✅ Benar! +${pointsEarned} poin` :
+                `❌ Salah! Jawaban: ${q.opts[q.correct]}`;
+            document.getElementById('gameQuestionArea').appendChild(feedbackDiv);
+
+            // Next question after delay
+            setTimeout(() => {
+                APP.gameState.currentQuestion++;
+                if (APP.gameState.currentQuestion >= APP.gameState.totalQuestions || APP.gameState.nyawa <= 0) {
+                    endGame();
+                } else {
+                    renderGame();
+                }
+            }, 1800);
+        }
+
+        function endGame() {
+            stopTimer();
+            const state = APP.gameState;
+            const totalTime = Math.floor((Date.now() - state.startTime) / 1000);
+            const maxScore = state.totalQuestions * [0, 10, 15, 20, 25][state.level];
+
+            // Save score
+            const scoreRecord = {
+                nama: APP.studentData.nama,
+                kelas: APP.studentData.kelas,
+                absen: APP.studentData.absen,
+                level: state.level,
+                score: state.score,
+                maxScore: maxScore,
+                correct: state.correctCount,
+                wrong: state.wrongCount,
+                totalQuestions: state.totalQuestions,
+                time: totalTime,
+                date: new Date().toLocaleDateString('id-ID'),
+                timestamp: new Date().toISOString()
+            };
+            APP.scores.push(scoreRecord);
+            localStorage.setItem('plsv_scores', JSON.stringify(APP.scores));
+
+            // Unlock next level
+            if (state.correctCount >= 3 && state.level < 4 && state.level >= APP.unlockedLevels) {
+                APP.unlockedLevels = state.level + 1;
+                localStorage.setItem('plsv_unlocked_' + APP.studentData.absen, APP.unlockedLevels);
+            }
+
+            // Show result
+            const percentage = (state.score / maxScore) * 100;
+            const stars = percentage >= 80 ? '⭐⭐⭐' : percentage >= 60 ? '⭐⭐' : percentage >= 40 ? '⭐' : '';
+            document.getElementById('gameQuestionArea').innerHTML = `
+                <div class="card" style="text-align:center;">
+                    <div style="font-size:70px;">${percentage >= 80 ? '🏆' : percentage >= 60 ? '🎉' : '📚'}</div>
+                    <h2>Level ${state.level} Selesai!</h2>
+                    <div style="font-size:40px; margin:10px 0;">${stars}</div>
+                    <div style="background:#F5F5F5; border-radius:12px; padding:16px; margin:12px 0; text-align:left;">
+                        <p>✅ Benar: <strong>${state.correctCount}</strong></p>
+                        <p>❌ Salah: <strong>${state.wrongCount}</strong></p>
+                        <p>⭐ Skor: <strong>${state.score} / ${maxScore}</strong></p>
+                        <p>⏱️ Waktu: <strong>${totalTime} detik</strong></p>
+                        <p>❤️ Sisa Nyawa: <strong>${state.nyawa}</strong></p>
+                    </div>
+                    <button class="btn btn-primary" onclick="navigateTo('levels')">🗺️ Kembali ke Level</button>
+                    <button class="btn btn-outline" onclick="mulaiLevel(${state.level})" style="margin-left:8px;">🔄 Ulangi Level</button>
+                </div>
+            `;
+            document.getElementById('gameProgressBar').style.width = '100%';
+            document.getElementById('gameProgress').textContent = 'Selesai!';
+        }
+
+        function playSound(type) {
+            // Simple audio feedback using oscillator
+            try {
+                const ctx = new(window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                if (type === 'correct') {
+                    osc.frequency.value = 800;
+                    gain.gain.value = 0.3;
+                } else {
+                    osc.frequency.value = 300;
+                    gain.gain.value = 0.2;
+                }
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                osc.stop(ctx.currentTime + 0.3);
+            } catch (e) {
+                // Audio not supported
+            }
+        }
+
+        // ==================== LATIHAN ====================
+        function renderLatihan() {
+            const area = document.getElementById('latihanArea');
+            let html = '';
+            latihanQuestions.forEach((q, i) => {
+                const letters = ['A', 'B', 'C', 'D'];
+                html += `
+                    <div class="card" style="margin-bottom:16px;">
+                        <p><strong>Soal ${i+1}:</strong> ${q.q}</p>
+                        <div style="display:flex; flex-direction:column; gap:6px; margin:10px 0;">
+                            ${q.opts.map((opt, j) => `
+                                <label style="padding:8px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:8px; background:#FAFAFA;">
+                                    <input type="radio" name="latihan${i}" value="${j}" onchange="cekLatihan(${i}, ${j}, this)">
+                                    <span>${letters[j]}. ${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                        <div id="latihanFeedback${i}" style="margin-top:8px;"></div>
+                    </div>
+                `;
+            });
+            area.innerHTML = html;
+        }
+
+        function cekLatihan(soalIndex, jawaban, el) {
+            const q = latihanQuestions[soalIndex];
+            const feedback = document.getElementById('latihanFeedback' + soalIndex);
+            if (jawaban === q.correct) {
+                feedback.innerHTML = '<div class="feedback-box benar">✅ Benar! ' + q.pembahasan + '</div>';
+                playSound('correct');
+            } else {
+                feedback.innerHTML = '<div class="feedback-box salah">❌ Salah! ' + q.pembahasan + '</div>';
+                playSound('wrong');
+            }
+            // Disable all radios for this question
+            const radios = document.getElementsByName('latihan' + soalIndex);
+            radios.forEach(r => r.disabled = true);
+        }
+
+        // ==================== ASESMEN ====================
+        function renderAsesmenPage() {
+            if (!APP.asesmenState) {
+                document.getElementById('asesmenArea').innerHTML = `
+                    <button class="btn btn-primary btn-block btn-lg" onclick="mulaiAsesmen()">📝 Mulai Asesmen</button>
+                `;
+            }
+        }
+
+        function mulaiAsesmen() {
+            if (!APP.studentData) {
+                showToast('⚠️ Isi data diri dulu!');
+                navigateTo('login');
+                return;
+            }
+            APP.asesmenState = {
+                currentQuestion: 0,
+                totalQuestions: 10,
+                answers: [],
+                score: 0,
+                startTime: Date.now(),
+                questions: [...asesmenQuestions]
+            };
+            shuffleArray(APP.asesmenState.questions);
+            renderAsesmenSoal();
+        }
+
+        function renderAsesmenSoal() {
+            const state = APP.asesmenState;
+            if (state.currentQuestion >= state.totalQuestions) {
+                selesaiAsesmen();
+                return;
+            }
+            const q = state.questions[state.currentQuestion];
+            const letters = ['A', 'B', 'C', 'D'];
+            let html = `
+                <div class="card">
+                    <p style="color:var(--biru); font-weight:600;">Soal ${state.currentQuestion + 1} dari ${state.totalQuestions}</p>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width:${(state.currentQuestion / state.totalQuestions) * 100}%"></div>
+                    </div>
+                </div>
+                <div class="question-card">
+                    <div class="question-text">${q.q}</div>
+                    <div class="options-list">
+                        ${q.opts.map((opt, i) => `
+                            <div class="option-item" onclick="jawabAsesmen(${i})" id="asesmenOpt-${i}">
+                                <span class="option-letter">${letters[i]}</span> ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('asesmenArea').innerHTML = html;
+        }
+
+        function jawabAsesmen(selectedIndex) {
+            const state = APP.asesmenState;
+            const q = state.questions[state.currentQuestion];
+            const isCorrect = selectedIndex === q.correct;
+
+            state.answers.push({
+                question: q.q,
+                answer: q.opts[selectedIndex],
+                correct: q.opts[q.correct],
+                isCorrect: isCorrect
+            });
+            if (isCorrect) state.score += 10;
+
+            // Mark
+            document.querySelectorAll('.option-item').forEach((el, i) => {
+                el.style.pointerEvents = 'none';
+                if (i === q.correct) el.classList.add('correct');
+                if (i === selectedIndex && !isCorrect) el.classList.add('wrong');
+            });
+
+            setTimeout(() => {
+                state.currentQuestion++;
+                renderAsesmenSoal();
+            }, 1000);
+        }
+
+        function selesaiAsesmen() {
+            const state = APP.asesmenState;
+            const totalTime = Math.floor((Date.now() - state.startTime) / 1000);
+            const percentage = (state.score / (state.totalQuestions * 10)) * 100;
+            let kategori = '';
+            if (percentage >= 90) kategori = 'Sangat Baik 🌟';
+            else if (percentage >= 75) kategori = 'Baik 👍';
+            else if (percentage >= 60) kategori = 'Cukup 📚';
+            else kategori = 'Perlu Bimbingan 💪';
+
+            // Save asesmen score
+            const asesmenRecord = {
+                nama: APP.studentData.nama,
+                kelas: APP.studentData.kelas,
+                absen: APP.studentData.absen,
+                type: 'asesmen',
+                score: state.score,
+                maxScore: state.totalQuestions * 10,
+                percentage: percentage,
+                kategori: kategori,
+                time: totalTime,
+                date: new Date().toLocaleDateString('id-ID'),
+                timestamp: new Date().toISOString()
+            };
+            APP.scores.push(asesmenRecord);
+            localStorage.setItem('plsv_scores', JSON.stringify(APP.scores));
+
+            document.getElementById('asesmenArea').innerHTML = `
+                <div class="card" style="text-align:center;">
+                    <div style="font-size:70px;">${percentage >= 80 ? '🏆' : '📝'}</div>
+                    <h2>Asesmen Selesai!</h2>
+                    <div style="background:#F5F5F5; border-radius:12px; padding:16px; margin:12px 0; text-align:left;">
+                        <p>⭐ Skor: <strong>${state.score} / ${state.totalQuestions * 10}</strong></p>
+                        <p>📊 Persentase: <strong>${percentage.toFixed(1)}%</strong></p>
+                        <p>📋 Kategori: <strong>${kategori}</strong></p>
+                        <p>⏱️ Waktu: <strong>${totalTime} detik</strong></p>
+                        <p>✅ Benar: <strong>${state.answers.filter(a=>a.isCorrect).length}</strong></p>
+                        <p>❌ Salah: <strong>${state.answers.filter(a=>!a.isCorrect).length}</strong></p>
+                    </div>
+                    <button class="btn btn-primary" onclick="APP.asesmenState=null; renderAsesmenPage();">🔄 Ulangi Asesmen</button>
+                    <button class="btn btn-outline" onclick="navigateTo('nilai')" style="margin-left:8px;">📊 Lihat Nilai</button>
+                </div>
+            `;
+        }
+
+        // ==================== NILAI ====================
+        function renderNilai() {
+            const filtered = APP.scores.filter(s => s.nama && s.absen);
+            const tableDiv = document.getElementById('tabelNilai');
+            if (filtered.length === 0) {
+                tableDiv.innerHTML = '<p style="text-align:center; color:#888;">Belum ada data nilai.</p>';
+            } else {
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama</th>
+                                <th>Kelas</th>
+                                <th>Tipe</th>
+                                <th>Level</th>
+                                <th>Skor</th>
+                                <th>Nilai</th>
+                                <th>Status</th>
+                                <th>Tanggal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                filtered.forEach((s, i) => {
+                    const percentage = s.percentage || ((s.score / s.maxScore) * 100);
+                    const status = percentage >= 75 ?
+                        '<span class="badge badge-success">Tuntas</span>' :
+                        '<span class="badge badge-danger">Remedial</span>';
+                    html += `
+                        <tr>
+                            <td>${i+1}</td>
+                            <td>${s.nama}</td>
+                            <td>${s.kelas}</td>
+                            <td>${s.type || 'Game Lvl ' + s.level}</td>
+                            <td>${s.level || '-'}</td>
+                            <td>${s.score}/${s.maxScore}</td>
+                            <td>${percentage.toFixed(0)}</td>
+                            <td>${status}</td>
+                            <td>${s.date}</td>
+                        </tr>
+                    `;
+                });
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            }
+
+            // Leaderboard
+            renderLeaderboard();
+        }
+
+        function renderLeaderboard() {
+            const area = document.getElementById('leaderboardArea');
+            const gameScores = APP.scores.filter(s => s.type !== 'asesmen');
+            const sorted = [...gameScores].sort((a, b) => b.score - a.score).slice(0, 10);
+
+            if (sorted.length === 0) {
+                area.innerHTML = '<p style="color:#888;">Belum ada data leaderboard.</p>';
+                return;
+            }
+
+            let html = '';
+            sorted.forEach((s, i) => {
+                const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
+                html += `
+                    <div class="leaderboard-item">
+                        <div class="leaderboard-rank ${rankClass}">${i+1}</div>
+                        <div style="flex:1;">
+                            <strong>${s.nama}</strong>
+                            <span style="color:#888; font-size:12px;">${s.kelas}</span>
+                        </div>
+                        <div style="font-weight:700; color:var(--hijau);">${s.score} poin</div>
+                    </div>
+                `;
+            });
+            area.innerHTML = html;
+        }
+
+        function resetNilai() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua data nilai?')) {
+                APP.scores = [];
+                localStorage.removeItem('plsv_scores');
+                localStorage.removeItem('plsv_unlocked_' + (APP.studentData?.absen || ''));
+                APP.unlockedLevels = 1;
+                renderNilai();
+                showToast('🔄 Semua nilai telah direset!');
+            }
+        }
+
+        // ==================== EXPORT EXCEL ====================
+        function exportToExcel() {
+            const filtered = APP.scores.filter(s => s.nama && s.absen);
+            if (filtered.length === 0) {
+                showToast('⚠️ Belum ada data untuk diekspor!');
+                return;
+            }
+
+            const workbook = XLSX.utils.book_new();
+
+            // Sheet 1: Semua Nilai
+            const dataAll = [
+                ['No', 'Nama', 'Kelas', 'No. Absen', 'Tipe', 'Level', 'Skor', 'Skor Maks', 'Persentase',
+                    'Kategori', 'Status', 'Waktu (detik)', 'Tanggal'
+                ]
+            ];
+            filtered.forEach((s, i) => {
+                const percentage = s.percentage || ((s.score / s.maxScore) * 100);
+                const status = percentage >= 75 ? 'Tuntas' : 'Remedial';
+                dataAll.push([
+                    i + 1, s.nama, s.kelas, s.absen, s.type || 'Game', s.level || '-',
+                    s.score, s.maxScore, percentage.toFixed(1) + '%',
+                    s.kategori || '-', status, s.time || '-', s.date
+                ]);
+            });
+            const ws1 = XLSX.utils.aoa_to_sheet(dataAll);
+            ws1['!cols'] = [
+                { wch: 5 }, { wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 10 },
+                { wch: 8 }, { wch: 8 }, { wch: 10 }, { wch: 10 }, { wch: 15 },
+                { wch: 10 }, { wch: 10 }, { wch: 12 }
+            ];
+            XLSX.utils.book_append_sheet(workbook, ws1, 'Semua Nilai');
+
+            // Sheet 2: Ringkasan per Siswa
+            const siswaMap = {};
+            filtered.forEach(s => {
+                const key = s.nama + '|' + s.kelas + '|' + s.absen;
+                if (!siswaMap[key]) siswaMap[key] = { nama: s.nama, kelas: s.kelas, absen: s.absen, scores: [],
+                    total: 0, count: 0 };
+                siswaMap[key].scores.push(s);
+                siswaMap[key].total += (s.percentage || ((s.score / s.maxScore) * 100));
+                siswaMap[key].count++;
+            });
+            const dataSummary = [
+                ['No', 'Nama', 'Kelas', 'No. Absen', 'Rata-rata Nilai', 'Jumlah Kegiatan', 'Status']
+            ];
+            Object.values(siswaMap).forEach((s, i) => {
+                const avg = s.total / s.count;
+                dataSummary.push([
+                    i + 1, s.nama, s.kelas, s.absen, avg.toFixed(1) + '%', s.count,
+                    avg >= 75 ? 'Tuntas' : 'Remedial'
+                ]);
+            });
+            const ws2 = XLSX.utils.aoa_to_sheet(dataSummary);
+            XLSX.utils.book_append_sheet(workbook, ws2, 'Ringkasan Siswa');
+
+            const fileName =
+                `Nilai_PLSV_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+            showToast('✅ File Excel berhasil diunduh!');
+        }
+
+        // ==================== BACKGROUND SYMBOLS ====================
+        function initBgSymbols() {
+            const symbols = ['x', 'y', '=', '+', '−', '×', '÷', '2x', '3x', 'ax', '5', '10', 'PLSV', '∑', '√'];
+            const container = document.getElementById('bgSymbols');
+            for (let i = 0; i < 20; i++) {
+                const span = document.createElement('span');
+                span.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                span.style.left = Math.random() * 90 + '%';
+                span.style.animationDelay = Math.random() * 15 + 's';
+                span.style.animationDuration = (10 + Math.random() * 20) + 's';
+                span.style.fontSize = (20 + Math.random() * 40) + 'px';
+                container.appendChild(span);
+            }
+        }
+
+        // ==================== INIT ====================
+        function init() {
+            initBgSymbols();
+            if (savedStudent) {
+                document.getElementById('inputNama').value = APP.studentData.nama;
+                document.getElementById('inputKelas').value = APP.studentData.kelas;
+                document.getElementById('inputAbsen').value = APP.studentData.absen;
+                document.getElementById('displayNama').textContent = APP.studentData.nama;
+            }
+            // Keyboard shortcut
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (document.getElementById('sidebar').classList.contains('active')) toggleSidebar();
+                    if (document.getElementById('modalOverlay').classList.contains('active')) closeModal();
+                }
+            });
+        }
+
+        init();
+        console.log('🌱 Petualangan PLSV - Game Edukasi Matematika siap!');
+        console.log('📚 Belajar Persamaan Linear Satu Variabel jadi menyenangkan!');
+    </script>
+</body>
+</html>
