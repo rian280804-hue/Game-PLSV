@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏰 Petualangan PLSV - Game Edukasi SMP</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js">
+    </script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js">
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js">
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Quicksand:wght@400;600;700&display=swap');
+        :root {
+            --blue-light: #7dd3fc;
+            --yellow: #fde047;
+            --green-neon: #a3e635;
+            --orange: #fb923c;
+            --purple-pastel: #c4b5fd;
+        }
+        * {
+            scroll-behavior: smooth;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #0f0a2e 0%, #1a1040 30%, #0d1b3e 60%, #0f0a2e 100%);
+            min-height: 100vh;
+        }
+        .game-bg {
+            background: radial-gradient(ellipse at 20% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 60%, rgba(236, 72, 153, 0.1) 0%, transparent 50%), radial-gradient(ellipse at 50% 80%, rgba(34, 211, 238, 0.1) 0%, transparent 50%), linear-gradient(180deg, #0f0a2e 0%, #1a1040 50%, #0d1b3e 100%);
+        }
+        .card-game {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-game {
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 28px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(139, 92, 246, 0.4);
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            font-family: 'Fredoka One', cursive;
+        }
+        .btn-game:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 32px rgba(139, 92, 246, 0.6);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+        }
+        .btn-info {
+            background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
+        }
+        .btn-home {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
+        }
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            overflow: hidden;
+            height: 12px;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #8b5cf6, #ec4899, #f59e0b);
+            height: 100%;
+            border-radius: 50px;
+            transition: width 0.8s ease;
+        }
+        .timer-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            overflow: hidden;
+            height: 8px;
+        }
+        .timer-fill {
+            height: 100%;
+            border-radius: 50px;
+            transition: width 1s linear;
+        }
+        .timer-fill.normal {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+        .timer-fill.warning {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+        .timer-fill.danger {
+            background: linear-gradient(90deg, #ef4444, #f87171);
+            animation: pulse 0.5s infinite;
+        }
+        .glow-text {
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 40px rgba(236, 72, 153, 0.4);
+        }
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+        @keyframes pop {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-10px);
+            }
+            75% {
+                transform: translateX(10px);
+            }
+        }
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(110vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        @keyframes reviewGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(245, 158, 11, 0.7);
+            }
+        }
+        @keyframes hpDecrease {
+            0% {
+                transform: scale(1.3);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-float {
+            animation: float 3s infinite;
+        }
+        .animate-pop {
+            animation: pop 0.3s ease-out;
+        }
+        .animate-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        .animate-review-glow {
+            animation: reviewGlow 1.5s infinite;
+        }
+        .animate-hp-decrease {
+            animation: hpDecrease 0.4s ease-out;
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        .monster-card {
+            animation: float 4s infinite;
+            filter: drop-shadow(0 0 30px rgba(255, 100, 100, 0.5));
+        }
+        .confetti-piece {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            animation: confettiFall 3s forwards;
+        }
+        .option-btn {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .option-btn:hover {
+            transform: scale(1.02);
+            border-color: #8b5cf6 !important;
+        }
+        .option-btn.wrong-flash {
+            background: rgba(239, 68, 68, 0.3) !important;
+            border-color: #ef4444 !important;
+            animation: shake 0.5s ease-in-out;
+        }
+        .level-completed-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #10b981;
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+        }
+        .review-mode-badge {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 12px;
+            animation: reviewGlow 1.5s infinite;
+        }
+        .materi-step {
+            background: rgba(139, 92, 246, 0.2);
+            border-left: 3px solid #8b5cf6;
+            padding: 12px 16px;
+            border-radius: 0 12px 12px 0;
+            margin: 8px 0;
+        }
+        .story-scene {
+            border: 2px solid rgba(245, 158, 11, 0.4);
+            border-radius: 16px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            margin: 12px 0;
+            text-align: center;
+        }
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #8b5cf6, #ec4899);
+            border-radius: 10px;
+        }
+        @media (max-width: 640px) {
+            .btn-game {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            .card-game {
+                border-radius: 16px;
+                padding: 16px !important;
+            }
+        }
+    </style>
+</head>
+<body class="game-bg">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // ==================== AUDIO ENGINE ====================
+        const useGameAudio = () => {
+            const audioCtxRef = useRef(null);
+            const masterGainRef = useRef(null);
+            const musicGainRef = useRef(null);
+            const sfxGainRef = useRef(null);
+            const isMusicPlayingRef = useRef(false);
+            const musicIntervalRef = useRef(null);
+            const currentMelodyRef = useRef(0);
+            const initAudio = useCallback(() => { if (!audioCtxRef.current) { try { audioCtxRef.current = new(window
+                            .AudioContext || window.webkitAudioContext)();
+                        masterGainRef.current = audioCtxRef.current.createGain();
+                        masterGainRef.current.gain.setValueAtTime(0.8, audioCtxRef.current.currentTime);
+                        masterGainRef.current.connect(audioCtxRef.current.destination);
+                        musicGainRef.current = audioCtxRef.current.createGain();
+                        musicGainRef.current.gain.setValueAtTime(0.35, audioCtxRef.current.currentTime);
+                        musicGainRef.current.connect(masterGainRef.current);
+                        sfxGainRef.current = audioCtxRef.current.createGain();
+                        sfxGainRef.current.gain.setValueAtTime(0.5, audioCtxRef.current.currentTime);
+                        sfxGainRef.current.connect(masterGainRef.current); } catch (e) { return null; } } return audioCtxRef
+                    .current; }, []);
+            const playTone = useCallback((freq, duration, type = 'sine', vol = 0.2, isMusic = false) => { const ctx =
+                    initAudio(); if (!ctx) return; const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(vol, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                osc.connect(gain); if (isMusic) gain.connect(musicGainRef.current); else gain.connect(sfxGainRef
+                    .current);
+                osc.start();
+                osc.stop(ctx.currentTime + duration); }, [initAudio]);
+            const playCorrect = useCallback(() => { playTone(523, 0.12, 'sine', 0.5);
+                setTimeout(() => playTone(659, 0.12, 'sine', 0.5), 100);
+                setTimeout(() => playTone(784, 0.18, 'sine', 0.55), 200); }, [playTone]);
+            const playWrong = useCallback(() => { playTone(200, 0.35, 'sawtooth', 0.35);
+                setTimeout(() => playTone(150, 0.45, 'sawtooth', 0.25), 150); }, [playTone]);
+            const playClick = useCallback(() => playTone(440, 0.06, 'sine', 0.2), [playTone]);
+            const playLevelUp = useCallback(() => { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f,
+                    0.18, 'sine', 0.55), i * 120)); }, [playTone]);
+            const playCoin = useCallback(() => { playTone(1200, 0.1, 'sine', 0.35);
+                setTimeout(() => playTone(1500, 0.12, 'sine', 0.4), 80); }, [playTone]);
+            const playVictory = useCallback(() => { [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => setTimeout(
+                    () => playTone(f, 0.25, 'sine', 0.6), i * 130)); }, [playTone]);
+            const playBossWarning = useCallback(() => { [200, 250, 200, 250].forEach((f, i) => setTimeout(() => playTone(
+                    f, 0.35, 'square', 0.4), i * 400)); }, [playTone]);
+            const playTimerWarning = useCallback(() => { playTone(600, 0.15, 'sine', 0.3);
+                setTimeout(() => playTone(500, 0.15, 'sine', 0.3), 200); }, [playTone]);
+            const playCombo = useCallback(() => { [800, 1000, 1200].forEach((f, i) => setTimeout(() => playTone(f, 0.1,
+                    'sine', 0.4), i * 80)); }, [playTone]);
+            const playReviewStart = useCallback(() => { playTone(350, 0.2, 'sine', 0.3);
+                setTimeout(() => playTone(450, 0.2, 'sine', 0.3), 200);
+                setTimeout(() => playTone(550, 0.3, 'sine', 0.4), 400); }, [playTone]);
+            const playHpDecrease = useCallback(() => { playTone(800, 0.08, 'sine', 0.3);
+                setTimeout(() => playTone(600, 0.1, 'sine', 0.25), 80); }, [playTone]);
+            const musicalScales = [
+                [262, 294, 330, 349, 392, 349, 330, 294],
+                [262, 330, 392, 523, 392, 330, 294, 262],
+            ];
+            const bassNotes = [
+                [131, 131, 165, 165, 175, 175, 165, 131],
+                [131, 165, 175, 196, 175, 165, 131, 131],
+            ];
+            const playBackgroundMusic = useCallback(() => { if (isMusicPlayingRef.current) return;
+                    isMusicPlayingRef.current = true; const playMelodyNote = () => { const melody =
+                            musicalScales[currentMelodyRef.current % musicalScales.length]; const bass =
+                            bassNotes[currentMelodyRef.current % bassNotes.length]; const noteIndex = Math.floor(
+                            Date.now() / 300) % melody.length;
+                        playTone(melody[noteIndex], 0.3, 'sine', 0.25, true);
+                        playTone(bass[noteIndex], 0.35, 'triangle', 0.2, true); if (noteIndex % 2 === 0) playTone(
+                            melody[noteIndex] * 1.5, 0.25, 'sine', 0.12, true); if (noteIndex === melody.length -
+                            1) currentMelodyRef.current++; };
+                    playMelodyNote();
+                    musicIntervalRef.current = setInterval(playMelodyNote, 300); }, [playTone]);
+            const stopBackgroundMusic = useCallback(() => { if (musicIntervalRef.current) { clearInterval(
+                        musicIntervalRef.current);
+                    musicIntervalRef.current = null; }
+                isMusicPlayingRef.current = false; }, []);
+            const setMusicVolume = useCallback((vol) => { if (musicGainRef.current && audioCtxRef.current) musicGainRef
+                    .current.gain.setValueAtTime(vol, audioCtxRef.current.currentTime); }, []);
+            const setSfxVolume = useCallback((vol) => { if (sfxGainRef.current && audioCtxRef.current) sfxGainRef.current
+                    .gain.setValueAtTime(vol, audioCtxRef.current.currentTime); }, []);
+            useEffect(() => { return () => { if (musicIntervalRef.current) clearInterval(musicIntervalRef.current); if (
+                        audioCtxRef.current) audioCtxRef.current.close(); }; }, []);
+            return { playCorrect, playWrong, playClick, playLevelUp, playCoin, playVictory, playBossWarning,
+                playTimerWarning, playCombo, playReviewStart, playHpDecrease, playBackgroundMusic, stopBackgroundMusic,
+                setMusicVolume, setSfxVolume, initAudio };
+        };
+
+        // ==================== CONFETTI ====================
+        const spawnConfetti = () => { const colors = ['#fde047', '#a3e635', '#7dd3fc', '#fb923c', '#c4b5fd', '#f472b6',
+                '#34d399', '#fbbf24'
+            ]; for (let i = 0; i < 50; i++) { const el = document.createElement('div');
+            el.className = 'confetti-piece';
+            el.style.left = Math.random() * 100 + '%';
+            el.style.top = -(Math.random() * 30 + 10) + 'px';
+            el.style.width = (Math.random() * 8 + 5) + 'px';
+            el.style.height = (Math.random() * 8 + 5) + 'px';
+            el.style.background = colors[Math.floor(Math.random() * colors.length)];
+            el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            el.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            el.style.animationDelay = Math.random() * 0.6 + 's';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 3500); } };
+
+        // ==================== DATA SOAL ====================
+        const allQuestionsData = {
+            1: { title: '🌱 Mengenal PLSV', monster: '🐛', monsterName: 'Cacing Persamaan', monsterHP: 4, timePerQuestion: 15, questions: [
+                { id: 0, type: 'multiple', q: 'Manakah yang merupakan Persamaan Linear Satu Variabel (PLSV)?', options: ['2x + 3 = 7', 'x² + 2 = 6', '2x + y = 10', 'x + 3 > 5'], answer: 0, points: 10 },
+                { id: 1, type: 'multiple', q: 'Bentuk umum dari PLSV yang benar adalah...', options: ['ax² + bx + c = 0', 'ax + b = c', 'ax + by = c', 'ax + b > c'], answer: 1, points: 10 },
+                { id: 2, type: 'multiple', q: 'Pada persamaan 4x - 7 = 9, koefisien dari x adalah...', options: ['-7', '9', '4', 'x'], answer: 2, points: 10 },
+                { id: 3, type: 'truefalse', q: 'Persamaan 3x + 2y = 10 merupakan contoh PLSV', answer: false, points: 10 },
+            ]},
+            2: { title: '🌿 Penjumlahan & Pengurangan PLSV', monster: '🦎', monsterName: 'Kadal Operasi', monsterHP: 4, timePerQuestion: 15, questions: [
+                { id: 0, type: 'multiple', q: 'Nilai x yang memenuhi persamaan x + 5 = 12 adalah...', options: ['5', '6', '7', '17'], answer: 2, points: 10 },
+                { id: 1, type: 'multiple', q: 'Nilai x yang memenuhi persamaan x - 8 = 3 adalah...', options: ['5', '8', '11', '-5'], answer: 2, points: 10 },
+                { id: 2, type: 'multiple', q: 'Nilai x dari 15 = x + 7 adalah...', options: ['22', '8', '7', '15'], answer: 1, points: 10 },
+                { id: 3, type: 'fill', q: 'Nilai x dari x - 6 = 10 adalah x = ...', answer: '16', points: 15 },
+            ]},
+            3: { title: '🍃 Perkalian & Pembagian PLSV', monster: '🐺', monsterName: 'Serigala Kalkulasi', monsterHP: 4, timePerQuestion: 20, questions: [
+                { id: 0, type: 'multiple', q: 'Nilai x dari persamaan 3x = 15 adalah...', options: ['3', '5', '12', '18'], answer: 1, points: 10 },
+                { id: 1, type: 'multiple', q: 'Nilai x dari persamaan x/2 = 8 adalah...', options: ['4', '6', '10', '16'], answer: 3, points: 10 },
+                { id: 2, type: 'multiple', q: 'Nilai x dari 4x = 2x + 6 adalah...', options: ['1', '2', '3', '6'], answer: 2, points: 10 },
+                { id: 3, type: 'fill', q: 'Nilai x dari 5x = 35 adalah x = ...', answer: '7', points: 15 },
+            ]},
+            4: { title: '🍂 PLSV Bentuk Kompleks', monster: '🐉', monsterName: 'Naga Kompleks', monsterHP: 4, timePerQuestion: 20, questions: [
+                { id: 0, type: 'multiple', q: 'Nilai x dari 2x + 3 = 11 adalah...', options: ['3', '4', '7', '8'], answer: 1, points: 10 },
+                { id: 1, type: 'multiple', q: 'Nilai x dari 5x - 2 = 3x + 8 adalah...', options: ['3', '4', '5', '6'], answer: 2, points: 10 },
+                { id: 2, type: 'multiple', q: 'Nilai x dari 3(x + 2) = 15 adalah...', options: ['1', '2', '3', '5'], answer: 2, points: 10 },
+                { id: 3, type: 'fill', q: 'Nilai x dari 2(3x - 1) = 4x + 10 adalah x = ...', answer: '6', points: 20, alternatives: ['6'] },
+            ]},
+            5: { title: '🌳 Soal Cerita PLSV', monster: '🦂', monsterName: 'Kalajengking Cerita', monsterHP: 4, timePerQuestion: 30, questions: [
+                { id: 0, type: 'multiple', q: 'Jumlah dua bilangan adalah 20. Bilangan pertama 4 lebihnya dari bilangan kedua. Bilangan pertama adalah...', options: ['8', '10', '12', '14'], answer: 2, points: 15 },
+                { id: 1, type: 'multiple', q: 'Umur Ali tiga kali umur Budi. Jumlah umur mereka 32 tahun. Umur Budi adalah...', options: ['6 tahun', '8 tahun', '10 tahun', '12 tahun'], answer: 1, points: 15 },
+                { id: 2, type: 'multiple', q: 'Keliling persegi 36 cm. Panjang sisi persegi adalah...', options: ['6 cm', '8 cm', '9 cm', '12 cm'], answer: 2, points: 10 },
+                { id: 3, type: 'fill', q: '3 buku + 2 pulpen = Rp17.000. Pulpen Rp2.500. Harga 1 buku = Rp...', answer: '4000', points: 20, alternatives: ['4000', '4.000'] },
+            ]},
+            6: { title: '👑 Boss Battle: Grand Master PLSV', monster: '👹', monsterName: 'Grand Master PLSV', monsterHP: 6, bossBattle: true, timeLimit: 120, timePerQuestion: 30, questions: [
+                { id: 0, type: 'multiple', q: 'Nilai x dari 2(3x - 1) - 3(x + 2) = 4 adalah...', options: ['2', '3', '4', '5'], answer: 2, points: 15 },
+                { id: 1, type: 'multiple', q: 'Jumlah tiga bilangan ganjil berurutan 45. Bilangan terbesarnya adalah...', options: ['15', '17', '19', '21'], answer: 1, points: 15 },
+                { id: 2, type: 'multiple', q: 'HP dari 2x - 1 = x + 3 adalah...', options: ['{2}', '{3}', '{4}', '{5}'], answer: 2, points: 15 },
+                { id: 3, type: 'fill', q: 'Nilai x dari (x + 2) / 3 = 5 adalah x = ...', answer: '13', points: 20, alternatives: ['13'] },
+                { id: 4, type: 'multiple', q: 'Umur Ibu 5 tahun lebih muda dari 2 kali umur Ani. Jumlah umur 40 tahun. Umur Ani...', options: ['12 tahun', '15 tahun', '18 tahun', '20 tahun'], answer: 1, points: 15 },
+                { id: 5, type: 'truefalse', q: 'Nilai x dari 3x + 2 = 2x + 7 adalah x = 5', answer: true, points: 10 },
+            ]}
+        };
+
+        // ==================== BADGES ====================
+        const badgesList = [
+            { id: 'first_blood', name: 'First Blood', icon: '🏆', desc: 'Selesaikan Level 1' },
+            { id: 'combo3', name: 'Combo x3', icon: '⚡', desc: '3 jawaban benar berturut-turut' },
+            { id: 'combo4', name: 'Combo x4', icon: '🌟', desc: '4 jawaban benar berturut-turut (+5 bonus)' },
+            { id: 'combo5', name: 'Combo x5', icon: '💫', desc: '5 jawaban benar berturut-turut' },
+            { id: 'perfect', name: 'Perfect Level', icon: '💎', desc: 'Semua benar dalam 1 level' },
+            { id: 'boss_slayer', name: 'Boss Slayer', icon: '👑', desc: 'Kalahkan Grand Master' },
+            { id: 'all_levels', name: 'Master PLSV', icon: '🎓', desc: 'Selesaikan semua level' },
+            { id: 'score100', name: 'Centurion', icon: '💯', desc: 'Capai 100+ poin' },
+        ];
+
+        const developerInfo = { title: "👨‍💻 Tim Pengembang", members: [{ name: "Muhammad Riansyah", nim: "2340604022",
+                role: "Lead Developer", emoji: "👨‍💻" }, { name: "Anita Suciani", nim: "2340604029",
+                role: "Content Designer", emoji: "👩‍🎨" }, { name: "Muhammad Anwar Efendy", nim: "2340604033",
+                role: "Game Designer", emoji: "🎮" }, { name: "Risliyanti", nim: "2340604042",
+                role: "Quality Assurance", emoji: "🧪" }, ] };
+
+        // ==================== GAME STORY (DIPERBAIKI) ====================
+        const gameStory = { title: "📜 Legenda Dunia Numerika", chapters: [{ id: 1, title: "Bab 1: Dunia yang Damai",
+                icon: "🏰", text: `Di sebuah dimensi bernama **Dunia Numerika**, semua makhluk hidup dalam kedamaian. Dunia ini dipenuhi dengan angka-angka ajaib yang menari di udara, pohon-pohon rumus yang berbuah bilangan, dan sungai-sungai persamaan yang mengalir jernih.\n\nPara penduduk Numerika hidup dengan satu prinsip: **"Setiap masalah punya solusi, setiap persamaan punya nilai x"**.\n\nKitab suci mereka adalah **Kitab Persamaan Kuno** yang berisi semua rumus dan hukum matematika. Kitab ini dijaga oleh 6 Penjaga Kuil yang tersebar di 6 wilayah Numerika.`,
+                scene: "🏰 Kerajaan Numerika yang damai dan harmonis" }, { id: 2, title: "Bab 2: Kebangkitan Kegelapan",
+                icon: "⚠️", text: `Suatu malam yang kelam, sebuah kekuatan jahat bernama **Grand Master PLSV** muncul dari kegelapan. Ia adalah makhluk yang tercipta dari semua kesalahan hitungan dan rumus yang rusak.\n\nGrand Master PLSV mencuri **Kitab Persamaan Kuno** dan merobeknya menjadi 6 bagian! Setiap bagian disembunyikan di tempat yang berbeda dan dijaga oleh monster-monster mengerikan yang ia ciptakan.\n\nAkibatnya, seluruh Dunia Numerika menjadi kacau. Angka-angka berjatuhan, rumus-rumus berantakan, dan para penduduk kehilangan kemampuan berhitung!`,
+                scene: "👹 Grand Master PLSV mencuri Kitab Persamaan dan menyebarkan monster!" }, { id: 3,
+                title: "Bab 3: Ramalan Pahlawan", icon: "🔮",
+                text: `Dalam keputusasaan, tetua kerajaan menemukan sebuah ramalan kuno:\n\n*"Ketika dunia jatuh dalam kegelapan angka, seorang Petualang dari dunia manusia akan datang. Ia akan menyelesaikan setiap persamaan, mengalahkan setiap monster, dan menyatukan kembali Kitab Persamaan. Hanya dengan ilmu PLSV, dunia dapat diselamatkan."*\n\nDan ramalan itu menunjuk padamu! Kamu adalah **Petualang Pilihan** yang ditakdirkan menyelamatkan Dunia Numerika. Bekalmu? **Ilmu Persamaan Linear Satu Variabel (PLSV)** yang akan membantumu memecahkan setiap teka-teki!`,
+                scene: "🔮 Ramalan kuno menunjukmu sebagai penyelamat!" }, { id: 4, title: "Bab 4: Enam Wilayah Berbahaya",
+                icon: "🗺️",
+                text: `Perjalananmu akan melewati **6 Wilayah Berbahaya** yang masing-masing dijaga monster:\n\n🌱 **Hutan Variabel** - Dijaga Cacing Persamaan 🐛\n🌿 **Gua Operasi** - Dijaga Kadal Operasi 🦎\n🍃 **Lembah Kalkulasi** - Dijaga Serigala Kalkulasi 🐺\n🍂 **Gunung Kompleks** - Dijaga Naga Kompleks 🐉\n🌳 **Gurun Cerita** - Dijaga Kalajengking Cerita 🦂\n👑 **Kastil Kegelapan** - Dijaga Grand Master PLSV 👹\n\nSetiap monster hanya bisa dikalahkan dengan menyelesaikan **semua soal PLSV dengan benar**. Setiap jawaban benar akan mengurangi HP monster. Kalahkan semua untuk merebut kembali pecahan Kitab!`,
+                scene: "🗺️ Enam wilayah berbahaya menanti!" }, { id: 5, title: "Bab 5: Kemenangan & Warisan",
+                icon: "🏆", text: `Setelah perjalanan panjang dan melelahkan, kamu berhasil mengalahkan Grand Master PLSV dalam **Pertempuran Boss** yang epik!\n\nKeenam pecahan Kitab Persamaan telah bersatu kembali. Dunia Numerika kembali pulih. Angka-angka kembali menari, rumus-rumus kembali teratur, dan para penduduk bisa berhitung lagi!\n\nSebagai ucapan terima kasih, para tetua menobatkanmu sebagai **"Grand Master of PLSV"** dan kisahmu dicatat dalam sejarah Numerika sebagai legenda yang akan dikenang selamanya.\n\nKini, ilmu PLSV telah menjadi warisan berharga yang dipelajari di seluruh dunia. Dan ingatlah: **setiap persamaan punya solusinya!**`,
+                scene: "🏆 Dunia Numerika terselamatkan! Kamu menjadi legenda!" }] };
+
+        // ==================== MUSIC CONTROLS ====================
+        const MusicControls = ({ audio }) => { const [musicOn, setMusicOn] = useState(false); const [musicVol,
+            setMusicVol] = useState(0.35); const [sfxVol, setSfxVol] = useState(0.5); const [showControls,
+            setShowControls] = useState(false); const toggleMusic = () => { if (musicOn) { audio
+                .stopBackgroundMusic();
+            setMusicOn(false); } else { audio.initAudio();
+            audio.playBackgroundMusic();
+            setMusicOn(true); } }; return ( < div className = "fixed bottom-4 right-4 z-50" > { showControls && ( < div
+            className = "card-game p-4 mb-2 animate-pop min-w-[220px]" > < p className =
+                "text-white text-xs mb-3 text-center font-bold" > 🔊 Pengaturan Suara < /p> < div className =
+                "space-y-3" > < div > < div className = "flex justify-between mb-1" > < span className =
+                    "text-white text-xs" > 🎵 Musik Latar < /span> < span className = "text-purple-300 text-xs" > { Math
+                .round(musicVol * 100) } % < /span> < /div> < input type = "range"
+            min = "0"
+            max = "1"
+            step = "0.01"
+            value = { musicVol }
+            onChange = {
+                (e) => { setMusicVol(parseFloat(e.target.value));
+                    audio.setMusicVolume(parseFloat(e.target.value)); } }
+            className = "w-full accent-purple-500 h-2" / > < /div> < div > < div className =
+                "flex justify-between mb-1" > < span className = "text-white text-xs" > 🔊 Efek Suara < /span> < span
+            className = "text-pink-300 text-xs" > { Math.round(sfxVol * 100) } % < /span> < /div> < input type = "range"
+            min = "0"
+            max = "1"
+            step = "0.01"
+            value = { sfxVol }
+            onChange = {
+                (e) => { setSfxVol(parseFloat(e.target.value));
+                    audio.setSfxVolume(parseFloat(e.target.value)); } }
+            className = "w-full accent-pink-500 h-2" / > < /div> < /div> < /div> ) } < div className =
+            "flex gap-2" > < button onClick = { toggleMusic }
+            className = { `btn-game ${musicOn ? 'btn-music' : 'bg-gray-600'} px-4 py-3 text-sm flex items-center gap-2` } > {
+                musicOn ? '🎵' : '🔇' } { musicOn && < div className =
+                    "music-visualizer flex gap-0.5 items-end h-4" > { [0, 1, 2, 3].map(i => < div key = { i }
+                        className = "w-1 bg-purple-400 rounded-full"
+                        style = {
+                            { animation: 'musicBars 1s infinite', animationDelay: `${i*0.15}s`, height: `${Math.random()*12+4}px` } }
+                        />) } < /div> } < /button> < button onClick = {
+                    () => setShowControls(!showControls) }
+                className = "btn-game bg-indigo-600 hover:bg-indigo-700 px-3 py-3 text-sm" > ⚙️ < /button> < /div> <
+                /div> ); };
+
+        // ==================== QUESTION TIMER ====================
+        const QuestionTimer = ({ timeLeft, totalTime, audio }) => { const percentage = (timeLeft / totalTime) * 100; const
+            getStatus = () => { if (percentage > 50) return 'normal'; if (percentage > 25) return 'warning'; return 'danger'; };
+            const status = getStatus(); const lastWarningRef = useRef(false);
+        useEffect(() => { if (timeLeft <= 5 && timeLeft > 0 && !lastWarningRef.current) { audio.playTimerWarning();
+                lastWarningRef.current = true; } if (timeLeft > 5) lastWarningRef.current = false; }, [timeLeft,
+            audio]); return ( < div className = { `flex items-center gap-2 ${timeLeft <= 5 ? 'animate-shake' : ''}` } > <
+            span className = { `text-sm font-bold ${status === 'danger' ? 'text-red-400' : status === 'warning' ? 'text-yellow-400' : 'text-green-400'}` }
+            style = {
+                { fontFamily: "'Fredoka One', cursive" } } > ⏱️ { timeLeft } s < /span> < div className =
+                "timer-bar flex-1 min-w-[60px]" > < div className = { `timer-fill ${status}` }
+            style = {
+                { width: `${percentage}%` } } > < /div> < /div> < /div> ); };
+
+        // ==================== MAIN APP ====================
+        const App = () => { const [screen, setScreen] = useState('intro'); const [studentName, setStudentName] =
+            useState(''); const [studentClass, setStudentClass] = useState(''); const [studentAbsen, setStudentAbsen] =
+            useState(''); const [currentLevel, setCurrentLevel] = useState(1); const [unlockedLevels,
+            setUnlockedLevels] = useState([1]); const [completedLevels, setCompletedLevels] = useState([]); const [
+            score, setScore] = useState(0); const [xp, setXp] = useState(0); const [playerLevel, setPlayerLevel] =
+            useState(1); const [combo, setCombo] = useState(0); const [maxCombo, setMaxCombo] = useState(0); const [
+            badges, setBadges] = useState([]); const [totalCorrect, setTotalCorrect] = useState(0); const [
+            totalWrong, setTotalWrong] = useState(0); const [gameHistory, setGameHistory] = useState([]); const [
+            diagnosticDone, setDiagnosticDone] = useState(false); const [leaderboard, setLeaderboard] = useState(
+            []); const audio = useGameAudio();
+        useEffect(() => { const saved = localStorage.getItem('plsv-final-v2'); if (saved) { try { const d = JSON
+                    .parse(saved); if (d.unlockedLevels) setUnlockedLevels(d.unlockedLevels); if (d.completedLevels)
+                    setCompletedLevels(d.completedLevels); if (d.score) setScore(d.score); if (d.xp) setXp(d.xp); if (
+                        d.playerLevel) setPlayerLevel(d.playerLevel); if (d.badges) setBadges(d.badges); if (d
+                        .diagnosticDone) setDiagnosticDone(d.diagnosticDone); if (d.totalCorrect) setTotalCorrect(d
+                        .totalCorrect); if (d.totalWrong) setTotalWrong(d.totalWrong); if (d.maxCombo) setMaxCombo(d
+                        .maxCombo); if (d.studentName) setStudentName(d.studentName); if (d.studentClass)
+                    setStudentClass(d.studentClass); if (d.studentAbsen) setStudentAbsen(d.studentAbsen); if (d
+                        .leaderboard) setLeaderboard(d.leaderboard); if (d.combo !== undefined) setCombo(d.combo); if (
+                        d.gameHistory) setGameHistory(d.gameHistory); } catch (e) {} } }, []);
+        const saveGame = useCallback(() => { const data = { unlockedLevels, completedLevels, score, xp, playerLevel,
+                    badges, diagnosticDone, totalCorrect, totalWrong, maxCombo, studentName, studentClass,
+                    studentAbsen, leaderboard, combo, gameHistory };
+                localStorage.setItem('plsv-final-v2', JSON.stringify(data)); }, [unlockedLevels, completedLevels, score,
+                xp, playerLevel, badges, diagnosticDone, totalCorrect, totalWrong, maxCombo, studentName,
+                studentClass, studentAbsen, leaderboard, combo, gameHistory
+            ]);
+        useEffect(() => { saveGame(); }, [saveGame]);
+        const addScore = useCallback((pts, isCorrect, isFirstTime = true) => { if (!isFirstTime) return; if (
+            isCorrect) { let bonusPoints = 0;
+            setCombo(c => { const nc = c + 1;
+            setMaxCombo(m => Math.max(m, nc)); if (nc >= 3) setBadges(b => b.find(bg => bg.id === 'combo3') ? b : [
+                ...b, badgesList.find(bl => bl.id === 'combo3')]); if (nc >= 4) { setBadges(b => b.find(
+                bg => bg.id === 'combo4') ? b : [...b, badgesList.find(bl => bl.id === 'combo4')]);
+            bonusPoints = 5;
+            audio.playCombo(); } if (nc >= 5) setBadges(b => b.find(bg => bg.id === 'combo5') ? b : [...b,
+                badgesList.find(bl => bl.id === 'combo5')]); return nc; });
+            setScore(s => s + pts + bonusPoints);
+            setTotalCorrect(c => c + 1);
+            setXp(x => { const nx = x + pts; if (nx >= playerLevel * 100) { setPlayerLevel(l => l + 1);
+            audio.playLevelUp(); } return nx; });
+            audio.playCorrect(); if (score + pts + bonusPoints >= 100) setBadges(b => b.find(bg => bg.id ===
+                'score100') ? b : [...b, badgesList.find(bl => bl.id === 'score100')]); } else { setScore(s =>
+            Math.max(0, s - 5));
+            setCombo(0);
+            setTotalWrong(w => w + 1);
+            audio.playWrong(); } }, [combo, playerLevel, audio, score]);
+        const markLevelCompleted = useCallback((level) => { setCompletedLevels(prev => prev.includes(level) ? prev :
+            [...prev, level]); }, []);
+        const isLevelCompleted = useCallback((level) => completedLevels.includes(level), [completedLevels]);
+        const unlockLevel = useCallback((level) => { setUnlockedLevels(prev => prev.includes(level) ? prev : [...prev,
+            level].sort((a, b) => a - b)); }, []);
+        const addBadge = useCallback((badgeId) => { const badge = badgesList.find(b => b.id === badgeId); if (badge)
+            setBadges(b => b.find(ex => ex.id === badgeId) ? b : [...b, badge]); }, []);
+        const resetGame = useCallback(() => { setScore(0);
+        setXp(0);
+        setPlayerLevel(1);
+        setCombo(0);
+        setMaxCombo(0);
+        setBadges([]);
+        setTotalCorrect(0);
+        setTotalWrong(0);
+        setUnlockedLevels([1]);
+        setCompletedLevels([]);
+        setCurrentLevel(1);
+        setDiagnosticDone(false);
+        setGameHistory([]);
+        setStudentName('');
+        setStudentClass('');
+        setStudentAbsen('');
+        localStorage.removeItem('plsv-final-v2'); }, []);
+        const addToLeaderboard = useCallback((name) => { const entry = { name: name || studentName || 'Pemain',
+            score, level: currentLevel, badges: badges.length, class: studentClass, date: new Date()
+            .toLocaleDateString('id-ID') };
+        setLeaderboard(prev => [...prev, entry].sort((a, b) => b.score - a.score).slice(0, 10)); }, [score,
+        currentLevel, badges, studentName, studentClass]);
+        const handleExportExcel = useCallback(() => { let csv = 'DATA HASIL BELAJAR\n\nIDENTITAS\n';
+        csv +=
+            `Nama,${studentName}\nKelas,${studentClass}\nAbsen,${studentAbsen}\n\nNILAI\n`;
+        csv +=
+            `Skor,${score}\nBenar,${totalCorrect}\nSalah,${totalWrong}\nAkurasi,${totalCorrect+totalWrong>0?Math.round((totalCorrect/(totalCorrect+totalWrong))*100):0}%\nLevel,${Math.max(...unlockedLevels)}\nCombo,${maxCombo}x\nBadge,${badges.map(b=>b.name).join(';')}\n`
+            ; if (gameHistory.length > 0) { csv += '\nRIWAYAT\nLevel,Skor,Benar,Waktu,Tanggal\n';
+            gameHistory.forEach(h => { csv +=
+                    `${h.level},${h.score},${h.correct},${h.time}s,${new Date(h.date).toLocaleDateString('id-ID')}\n`
+                    ; }); } const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL
+            .createObjectURL(blob); const a = document.createElement('a');
+        a.href = url;
+        a.download = `hasil-plsv-${studentName||'siswa'}.csv`;
+        a.click();
+        URL.revokeObjectURL(url); }, [score, totalCorrect, totalWrong, unlockedLevels, badges, maxCombo,
+        studentName, studentClass, studentAbsen, gameHistory]);
+        const handleShareWA = useCallback(() => { const text =
+                `🏰 Petualangan PLSV 🏰\n\n👤 ${studentName}\n🏫 ${studentClass} | Absen ${studentAbsen}\n\n🎮 Skor: ${score}\n✅ Benar: ${totalCorrect}\n❌ Salah: ${totalWrong}\n🔥 Combo: ${maxCombo}x\n🏅 Badge: ${badges.length}\n\n📚 Ayo belajar PLSV!`
+                ;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank'); }, [score, totalCorrect,
+            totalWrong, badges, maxCombo, studentName, studentClass, studentAbsen
+        ]);
+        const navigateTo = useCallback((newScreen) => { audio.playClick();
+            setScreen(newScreen); }, [audio]);
+        const isRegistered = studentName && studentClass && studentAbsen;
+        const goHome = useCallback(() => { audio.playClick();
+            setScreen('intro'); }, [audio]);
+        return ( < div className = "min-h-screen game-bg relative" > { Array.from({ length: 25 }).map((_, i) => ( < div
+                key = { i }
+                className = "absolute rounded-full bg-white pointer-events-none"
+                style = {
+                    { left: Math.random() * 100 + '%', top: Math.random() * 100 + '%', width: (Math.random() * 3 + 1) +
+                            'px', height: (Math.random() * 3 + 1) + 'px', opacity: Math.random() * 0.6 + 0.2,
+                        animation: `twinkle ${Math.random()*3+2}s infinite`, animationDelay: Math.random() * 2 + 's' } }
+                />)) } < MusicControls audio = { audio }
+            /> { screen === 'intro' && < IntroScreen onStart = {
+                    () => { if (!isRegistered) navigateTo('register'); else if (!diagnosticDone) navigateTo(
+                            'diagnostic'); else navigateTo('game'); } }
+                onReset = { resetGame }
+                onMateri = {
+                    () => navigateTo('materi') }
+                onGuide = {
+                    () => navigateTo('guide') }
+                onCredit = {
+                    () => navigateTo('credit') }
+                hasSave = { !!localStorage.getItem('plsv-final-v2') && unlockedLevels.length > 0 }
+                isRegistered = { isRegistered }
+                />} { screen === 'register' && < RegisterScreen studentName = { studentName }
+                setStudentName = { setStudentName }
+                studentClass = { studentClass }
+                setStudentClass = { setStudentClass }
+                studentAbsen = { studentAbsen }
+                setStudentAbsen = { setStudentAbsen }
+                onNext = {
+                    () => { if (!diagnosticDone) navigateTo('diagnostic'); else navigateTo('game'); } }
+                audio = { audio }
+                />} { screen === 'materi' && < MateriScreen onBack = {
+                    () => navigateTo('intro') }
+                />} { screen === 'guide' && < GuideScreen gameStory = { gameStory }
+                onBack = {
+                    () => navigateTo('intro') }
+                />} { screen === 'credit' && < CreditScreen developerInfo = { developerInfo }
+                onBack = {
+                    () => navigateTo('intro') }
+                />} { screen === 'diagnostic' && < DiagnosticTest onComplete = {
+                    () => { setDiagnosticDone(true);
+                        audio.playLevelUp();
+                        navigateTo('game'); } }
+                audio = { audio }
+                />} { screen === 'game' && < GameScreen currentLevel = { currentLevel }
+                setCurrentLevel = { setCurrentLevel }
+                unlockedLevels = { unlockedLevels }
+                completedLevels = { completedLevels }
+                isLevelCompleted = { isLevelCompleted }
+                markLevelCompleted = { markLevelCompleted }
+                unlockLevel = { unlockLevel }
+                score = { score }
+                addScore = { addScore }
+                combo = { combo }
+                xp = { xp }
+                playerLevel = { playerLevel }
+                studentName = { studentName }
+                badges = { badges }
+                addBadge = { addBadge }
+                audio = { audio }
+                spawnConfetti = { spawnConfetti }
+                allQuestionsData = { allQuestionsData }
+                setGameHistory = { setGameHistory }
+                navigateTo = { navigateTo }
+                goHome = { goHome }
+                />} { screen === 'result' && < ResultScreen score = { score }
+                totalCorrect = { totalCorrect }
+                totalWrong = { totalWrong }
+                badges = { badges }
+                playerLevel = { playerLevel }
+                maxCombo = { maxCombo }
+                studentName = { studentName }
+                studentClass = { studentClass }
+                studentAbsen = { studentAbsen }
+                onReplay = {
+                    () => { setCombo(0);
+                        navigateTo('game'); } }
+                onHome = { goHome }
+                onExportExcel = { handleExportExcel }
+                onShareWA = { handleShareWA }
+                addToLeaderboard = { addToLeaderboard }
+                leaderboard = { leaderboard }
+                spawnConfetti = { spawnConfetti }
+                />} { screen === 'report' && < ReportScreen score = { score }
+                totalCorrect = { totalCorrect }
+                totalWrong = { totalWrong }
+                badges = { badges }
+                playerLevel = { playerLevel }
+                maxCombo = { maxCombo }
+                unlockedLevels = { unlockedLevels }
+                completedLevels = { completedLevels }
+                gameHistory = { gameHistory }
+                studentName = { studentName }
+                studentClass = { studentClass }
+                studentAbsen = { studentAbsen }
+                onBack = {
+                    () => navigateTo('game') }
+                onHome = { goHome }
+                onExportExcel = { handleExportExcel }
+                onShareWA = { handleShareWA }
+                />} < /div> ); };
+
+        // ==================== SCREENS ====================
+        const IntroScreen = ({ onStart, onReset, onMateri, onGuide, onCredit, hasSave, isRegistered }) => { const [show,
+            setShow] = useState(false);
+        useEffect(() => { setTimeout(() => setShow(true), 300); }, []); return ( < div className =
+            "flex flex-col items-center justify-center min-h-screen px-4 py-8 text-center" > < div className =
+            "animate-float mb-4" > < span className = "text-7xl" > 🏰 < /span> < /div> < h1 className =
+            "text-3xl md:text-5xl text-white glow-text mb-3"
+        style = {
+            { fontFamily: "'Fredoka One', cursive" } } > Petualangan PLSV < /h1> < p className =
+            "text-lg text-purple-200 mb-2" > 📐 Persamaan Linear Satu Variabel📐 < /p> < p className =
+            "text-sm text-blue-300 mb-6" > Game Edukasi Matematika SMP Kelas 8 < /p> < div className =
+            "flex gap-4 mb-6" > { ['🐛', '🦎', '🐺', '👹'].map((e, i) => < span key = { i }
+                className = "text-3xl animate-float"
+                style = {
+                    { animationDelay: `${i*0.3}s` } } > { e } < /span>) } < /div> < div className = { `flex flex-col gap-3 max-w-sm w-full ${show?'opacity-100':'opacity-0'}` } >
+            <
+            button onClick = { onStart }
+            className = "btn-game text-lg py-3 w-full" > { hasSave && isRegistered ? '💾 Lanjutkan Petualangan' :
+                '⚡ Mulai Petualangan' } < /button> < button onClick = { onMateri }
+            className = "btn-game btn-info text-lg w-full" > 📖 Materi PLSV < /button> < button onClick = { onGuide }
+            className = "btn-game btn-success text-lg w-full" > 📋 Petunjuk & Cerita < /button> < button onClick = {
+                onCredit }
+            className = "btn-game bg-indigo-500 text-lg w-full" > 👨‍💻 Tim Pengembang < /button> { hasSave && < button
+                onClick = {
+                    () => { if (confirm('Reset semua progress?')) onReset(); } }
+                className = "btn-game btn-warning w-full" > 🔄 Reset Progress < /button> } < /div> < /div> ); };
+
+        const RegisterScreen = ({ studentName, setStudentName, studentClass, setStudentClass, studentAbsen,
+        setStudentAbsen, onNext, audio }) => { const [error, setError] = useState(''); const h = () => { if (!studentName
+            .trim()) { setError('Nama harus diisi!'); return; } if (!studentClass.trim()) { setError(
+                'Kelas harus diisi!'); return; } if (!studentAbsen.trim()) { setError('No Absen harus diisi!'); return; }
+        audio.playClick();
+        onNext(); }; return ( < div className =
+            "flex flex-col items-center justify-center min-h-screen px-4" > < div className =
+            "card-game p-6 max-w-md w-full text-center" > < span className = "text-5xl mb-4 block" > 📝 < /span> < h2
+        className = "text-2xl text-white mb-2"
+        style = {
+            { fontFamily: "'Fredoka One', cursive" } } > Data Diri Pemain < /h2> < p className =
+            "text-purple-200 mb-4" > Masukkan data dirimu untuk memulai petualangan! < /p> < div className =
+            "space-y-4 mb-6" > < div > < label className = "text-white text-sm block mb-1 text-left" > 👤 Nama Lengkap <
+            /label> < input type = "text"
+        value = { studentName }
+        onChange = { e => setStudentName(e.target.value) }
+        placeholder = "Masukkan nama lengkap"
+        className = "w-full bg-white/15 text-white px-4 py-3 rounded-xl border-2 border-white/20 outline-none" / > <
+            /div> < div > < label className = "text-white text-sm block mb-1 text-left" > 🏫 Kelas < /label> < input
+        type = "text"
+        value = { studentClass }
+        onChange = { e => setStudentClass(e.target.value) }
+        placeholder = "Contoh: 8A / 8B"
+        className = "w-full bg-white/15 text-white px-4 py-3 rounded-xl border-2 border-white/20 outline-none" / > <
+            /div> < div > < label className = "text-white text-sm block mb-1 text-left" > 🔢 No Absen < /label> < input
+        type = "number"
+        value = { studentAbsen }
+        onChange = { e => setStudentAbsen(e.target.value) }
+        placeholder = "Masukkan nomor absen"
+        className = "w-full bg-white/15 text-white px-4 py-3 rounded-xl border-2 border-white/20 outline-none" / > <
+            /div> < /div> { error && < p className = "text-red-400 text-sm mb-4" > { error } < /p> } < button onClick = { h }
+        className = "btn-game w-full" > 🚀 Mulai Petualangan! < /button> < /div> < /div> ); };
+
+        // ==================== MATERI SCREEN (DIPERBAIKI) ====================
+        const MateriScreen = ({ onBack }) => { const [active, setActive] = useState(1); const materiSections = [{ id: 1,
+                title: "📖 Apa itu PLSV?", icon: "📚", content: `**Persamaan Linear Satu Variabel (PLSV)** adalah kalimat matematika yang memiliki satu variabel berpangkat satu dan dihubungkan oleh tanda sama dengan (=).\n\n**Ciri-ciri PLSV:**\n✅ Memiliki satu variabel (misal: x, a, y)\n✅ Variabel berpangkat 1\n✅ Dihubungkan tanda "="\n✅ Memiliki koefisien dan konstanta\n\n**Bentuk Umum:**\n📐 ax + b = c  atau  ax + b = cx + d\n\n**Contoh PLSV:**\n• 2x + 3 = 7 ✅\n• 5x - 4 = 2x + 8 ✅\n• 3(x + 2) = 15 ✅\n\n**Bukan PLSV:**\n• x² + 2 = 6 ❌ (pangkat 2)\n• 2x + y = 10 ❌ (dua variabel)`,
+                examples: ["2x + 3 = 7 → PLSV (variabel x, pangkat 1)", "x² + 2 = 6 → BUKAN (pangkat 2)",
+                    "2x + y = 10 → BUKAN (dua variabel)"
+                ] }, { id: 2, title: "🔍 Bagian-Bagian PLSV", icon: "🔎",
+                content: `Mari kita bedah PLSV **3x + 5 = 14**:\n\n• **Variabel**: x → huruf yang nilainya dicari\n• **Koefisien**: 3 → angka di depan variabel\n• **Konstanta**: 5 dan 14 → angka tanpa variabel\n• **Ruas Kiri**: 3x + 5 → sebelum tanda "="\n• **Ruas Kanan**: 14 → setelah tanda "="\n\n**Tips Mengingat:**\n🎯 Variabel = huruf misteri\n🎯 Koefisien = pasangan variabel\n🎯 Konstanta = angka sendiri`,
+                examples: ["4x - 7 = 9: variabel=x, koefisien=4, konstanta=-7 dan 9",
+                    "2a + 10 = 3a - 5: variabel=a, koefisien=2 dan 3"
+                ] }, { id: 3, title: "⚖️ Sifat-Sifat PLSV", icon: "⚖️",
+                content: `PLSV memiliki 4 sifat penting. Ibarat timbangan, apa yang dilakukan di satu sisi harus dilakukan di sisi lain!\n\n**1. Sifat Penambahan (+)**\nKedua ruas ditambah bilangan sama\n📝 x - 3 = 5 → x - 3 + 3 = 5 + 3 → x = 8\n\n**2. Sifat Pengurangan (-)**\nKedua ruas dikurang bilangan sama\n📝 x + 4 = 10 → x + 4 - 4 = 10 - 4 → x = 6\n\n**3. Sifat Perkalian (×)**\nKedua ruas dikali bilangan sama (≠0)\n📝 x/2 = 6 → x/2 × 2 = 6 × 2 → x = 12\n\n**4. Sifat Pembagian (÷)**\nKedua ruas dibagi bilangan sama (≠0)\n📝 3x = 15 → 3x/3 = 15/3 → x = 5`,
+                examples: ["Penambahan: x-7=2 → x=9", "Pengurangan: x+5=12 → x=7", "Perkalian: x/3=4 → x=12",
+                    "Pembagian: 4x=20 → x=5"
+                ] }, { id: 4, title: "📝 Langkah Menyelesaikan PLSV", icon: "✏️",
+                content: `Ikuti 5 langkah mudah ini untuk menyelesaikan PLSV:\n\n**Langkah 1:** Kumpulkan variabel di satu ruas\n**Langkah 2:** Kumpulkan konstanta di ruas lain\n**Langkah 3:** Sederhanakan kedua ruas\n**Langkah 4:** Bagi dengan koefisien variabel\n**Langkah 5:** Tulis Himpunan Penyelesaian (HP)\n\n**Contoh Lengkap: 2x + 3 = 7**\nL1-2: 2x = 7 - 3\nL3: 2x = 4\nL4: x = 4/2\nL5: x = 2, HP = {2}\n\n**Ingat!** Pindah ruas = ganti tanda\n➕ jadi ➖, ➖ jadi ➕\n✖️ jadi ➗, ➗ jadi ✖️`,
+                examples: ["3x-5=10 → 3x=15 → x=5", "2(x+1)=8 → 2x=6 → x=3",
+                    "5x+2=3x+10 → 2x=8 → x=4"
+                ] }, { id: 5, title: "🎯 Soal Cerita PLSV", icon: "🎯",
+                content: `PLSV sering muncul dalam soal cerita sehari-hari. Ikuti langkah ini:\n\n**Langkah Soal Cerita:**\n1. Baca dan pahami soal\n2. Tentukan variabel (misal: x)\n3. Buat model matematika\n4. Selesaikan persamaan\n5. Tafsirkan hasilnya\n\n**Contoh:** "Jumlah dua bilangan 15. Bilangan pertama 3 lebihnya dari kedua."\n\nMisal: bilangan kedua = x\nBilangan pertama = x + 3\nPersamaan: (x+3) + x = 15\n2x + 3 = 15 → 2x = 12 → x = 6\nBilangan pertama = 9, kedua = 6 ✅`,
+                examples: ["Umur: Ali 3x Budi, jumlah 32 → Budi 8 thn", "Keliling: Persegi K=36 → sisi 9 cm",
+                    "Harga: 3 buku+2 pulpen=17000 → buku Rp4000"
+                ] }]; return ( < div className = "flex flex-col min-h-screen px-4 py-6" > < div className =
+                "max-w-4xl mx-auto w-full" > < div className = "flex justify-between items-center mb-6" > < h2 className =
+                "text-2xl text-white"
+            style = {
+                { fontFamily: "'Fredoka One', cursive" } } > 📖 Materi PLSV Lengkap < /h2> < button onClick = { onBack }
+            className = "text-white bg-white/10 px-4 py-2 rounded-full text-sm" > ← Kembali < /button> < /div> < p className =
+                "text-purple-200 mb-4 text-center" > Pilih materi yang ingin dipelajari: < /p> < div className =
+                "flex flex-wrap gap-2 mb-6 justify-center" > { materiSections.map(s => < button key = { s.id }
+                    onClick = {
+                        () => setActive(s.id) }
+                    className = { `px-4 py-2 rounded-full text-sm transition-all ${active===s.id?'bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold':'bg-white/10 text-white hover:bg-white/20'}` } > { s
+                        .icon } { s.title } < /button>) } < /div> { materiSections.filter(s => s.id === active).map(s => < div
+                        key = { s.id }
+                        className = "card-game p-6 md:p-8 animate-fade-in-up" > < h3 className =
+                        "text-xl md:text-2xl text-white mb-4 flex items-center gap-2"
+                    style = {
+                        { fontFamily: "'Fredoka One', cursive" } } > < span className = "text-3xl" > { s.icon } < /span> { s
+                        .title } < /h3> < div className =
+                        "text-white/90 mb-6 whitespace-pre-line leading-relaxed" > { s.content } < /div> { s.examples && <
+                        div className = "mt-4 bg-purple-500/10 border border-purple-400/30 rounded-2xl p-4" > < h4 className =
+                            "text-yellow-300 mb-3 font-bold" > 💡 Contoh Penerapan: < /h4> < div className =
+                            "space-y-2" > { s.examples.map((ex, i) => < div key = { i }
+                                className = "bg-white/5 rounded-xl p-3 text-white/80 text-sm" > { ex } < /div>) } < /div> <
+                            /div> } < /div>) } < /div> < /div> ); };
+
+        // ==================== GUIDE SCREEN (DIPERBAIKI) ====================
+        const GuideScreen = ({ gameStory, onBack }) => { const [tab, setTab] = useState('story'); const [ch, setCh] =
+            useState(1); const chapter = gameStory.chapters.find(c => c.id === ch); const guides = [{ icon: '🎯',
+                title: 'Tujuan Utama',
+                desc: 'Kamu adalah Petualang yang harus menyelamatkan Dunia Numerika! Kalahkan 6 monster dengan menyelesaikan soal PLSV. Kumpulkan pecahan Kitab Persamaan dan kalahkan Grand Master PLSV!'
+            }, { icon: '📝', title: 'Cara Mendaftar',
+                desc: 'Isi Nama, Kelas, dan No Absen di menu pendaftaran. Data ini akan muncul di laporan, leaderboard, dan export Excel.'
+            }, { icon: '🗺️', title: 'Peta Level & Monster',
+                desc: 'Ada 6 level. Setiap level punya monster dengan HP sesuai jumlah soal (4-6 HP). Level 1-5: 4 HP, Level 6 (Boss): 6 HP. Setiap jawaban BENAR mengurangi 1 HP monster.'
+            }, { icon: '⏱️', title: 'Batas Waktu',
+                desc: 'Level 1-2: 15 detik/soal. Level 3-4: 20 detik/soal. Level 5-6: 30 detik/soal. Boss Battle punya timer total 120 detik. Jika waktu habis, level gagal.'
+            }, { icon: '🔄', title: 'Sistem Review Soal',
+                desc: 'Kerjakan semua soal. Soal yang SALAH akan dikumpulkan dan diulangi di akhir. Jawaban benar TIDAK ditampilkan saat kamu salah. Kamu harus menemukan sendiri jawaban yang benar!'
+            }, { icon: '🔥', title: 'Combo & Bonus',
+                desc: 'Jawab benar berturut-turut untuk combo! Combo 3x: badge, Combo 4x: +5 bonus poin, Combo 5x: +10 bonus poin. Jawaban salah mereset combo ke 0.'
+            }, { icon: '⭐', title: 'Skor & Poin',
+                desc: 'Jawaban benar: +10 poin. Jawaban salah: -5 poin. Combo 4x: +5 bonus. Bonus waktu di Boss Battle. Skor hanya bertambah saat PERTAMA KALI menyelesaikan level.'
+            }, { icon: '🏅', title: 'Badge & Prestasi',
+                desc: 'Kumpulkan 8 badge: First Blood, Combo x3/x4/x5, Perfect Level, Boss Slayer, Master PLSV, Centurion. Badge hanya didapat saat pertama kali.'
+            }, { icon: '🎵', title: 'Musik & Suara',
+                desc: 'Tombol 🎵 di pojok kanan bawah untuk menyalakan musik latar. Tombol ⚙️ untuk mengatur volume musik dan efek suara secara terpisah.'
+            }, { icon: '📊', title: 'Laporan & Export',
+                desc: 'Menu Laporan menampilkan semua nilai. Bisa diexport ke Excel, dibagikan ke WhatsApp, atau dicetak langsung. Leaderboard mencatat 10 skor tertinggi.'
+            }, { icon: '💡', title: 'Tips Sukses',
+                desc: '1. Pelajari materi dulu di menu Materi PLSV\n2. Gunakan kertas buram untuk menghitung\n3. Perhatikan timer, jawab sebelum waktu habis\n4. Jaga combo untuk bonus\n5. Jangan menyerah, coba lagi!' }]; return ( <
+            div className = "flex flex-col min-h-screen px-4 py-6" > < div className = "max-w-4xl mx-auto w-full" > < div
+            className = "flex justify-between items-center mb-6" > < h2 className = "text-2xl md:text-3xl text-white"
+            style = {
+                { fontFamily: "'Fredoka One', cursive" } } > 📋 Petunjuk & Cerita < /h2> < button onClick = { onBack }
+            className = "text-white bg-white/10 px-4 py-2 rounded-full text-sm" > ← Kembali < /button> < /div> < div className =
+                "flex gap-2 mb-6 justify-center" > < button onClick = {
+                () => setTab('story') }
+            className = { `px-6 py-3 rounded-full text-sm font-bold ${tab==='story'?'bg-gradient-to-r from-yellow-500 to-orange-500 text-white':'bg-white/10 text-white'}` } >
+                📜 Cerita Game < /button> < button onClick = {
+                () => setTab('guide') }
+            className = { `px-6 py-3 rounded-full text-sm font-bold ${tab==='guide'?'bg-gradient-to-r from-purple-500 to-pink-500 text-white':'bg-white/10 text-white'}` } >
+                📋 Panduan Bermain < /button> < /div> { tab === 'story' && chapter && < div className =
+                "animate-fade-in-up" > < div className = "card-game p-6 md:p-8 mb-6" > < h3 className =
+                "text-2xl text-white mb-4 text-center"
+            style = {
+                { fontFamily: "'Fredoka One', cursive" } } > { gameStory.title } < /h3> < div className =
+                "flex justify-between items-center mb-6" > < button onClick = {
+                    () => ch > 1 && setCh(ch - 1) }
+                disabled = { ch === 1 }
+                className = { `text-white px-3 py-1 rounded-full text-sm ${ch===1?'opacity-30':'bg-white/10 hover:bg-white/20'}` } > ←
+                Sebelumnya < /button> < span className = "text-purple-300 text-sm font-bold" > Bab { ch }
+                dari { gameStory.chapters.length } < /span> < button onClick = {
+                    () => ch < gameStory.chapters.length && setCh(ch + 1) }
+                disabled = { ch === gameStory.chapters.length }
+                className = { `text-white px-3 py-1 rounded-full text-sm ${ch===gameStory.chapters.length?'opacity-30':'bg-white/10 hover:bg-white/20'}` } >
+                Selanjutnya → < /button> < /div> < div className = "story-scene" > < span className =
+                "text-6xl block mb-3" > { chapter.icon } < /span> < h4 className =
+                "text-xl text-yellow-300 mb-2"
+            style = {
+                { fontFamily: "'Fredoka One', cursive" } } > { chapter.title } < /h4> < p className =
+                "text-gray-400 text-sm italic" > "{chapter.scene}" < /p> < /div> < div className =
+                "text-white/90 leading-relaxed whitespace-pre-line" > { chapter.text } < /div> < div className =
+                "flex justify-center gap-2 mt-6" > { gameStory.chapters.map(chap => < button key = { chap.id }
+                    onClick = {
+                        () => setCh(chap.id) }
+                    className = { `w-3 h-3 rounded-full transition-all ${ch===chap.id?'bg-yellow-400 scale-125':'bg-white/30 hover:bg-white/50'}` }
+                    />) } < /div> < /div> < /div> } { tab === 'guide' && < div className = "space-y-4" > { guides.map((g,
+                    i) => < div key = { i }
+                    className = "card-game p-5 flex gap-4 items-start animate-fade-in-up"
+                    style = {
+                        { animationDelay: `${i*0.06}s` } } > < span className =
+                        "text-4xl flex-shrink-0" > { g.icon } < /span> < div > < h3 className =
+                        "text-white font-bold text-lg mb-1"
+                    style = {
+                        { fontFamily: "'Fredoka One', cursive" } } > { g.title } < /h3> < p className =
+                        "text-gray-300 text-sm leading-relaxed" > { g.desc } < /p> < /div> < /div>) } < div className =
+                    "card-game p-6 mt-4 text-center bg-purple-500/10 border border-purple-400/30" > < h3 className =
+                    "text-yellow-300 font-bold text-lg mb-3" > ⚠️ Hal Penting! < /h3> < ul className =
+                    "text-white text-sm space-y-2 text-left" > < li > ✅ Skor hanya bertambah saat < strong > PERTAMA
+                    KALI < /strong> menyelesaikan level < /li> < li > ✅ Level yang sudah selesai ditandai ✅ dan bisa
+                diulang(tapi skor tidak bertambah) < /li> < li > ✅ Jawaban benar TIDAK ditampilkan saat salah < /li> <
+                li > ✅ Setiap jawaban benar mengurangi 1 HP monster < /li> < li > ✅ HP monster = jumlah soal di
+                level tersebut < /li> < /ul> < /div> < /div> } < /div> < /div> ); };
+
+        const CreditScreen = ({ developerInfo, onBack }) => ( < div className =
+            "flex flex-col items-center min-h-screen px-4 py-6" > < div className = "max-w-2xl w-full" > < div className =
+                "flex justify-between items-center mb-6" > < h2 className = "text-2xl text-white"
+            style = {
+                { fontFamily: "'Fredoka One', cursive" } } > { developerInfo.title } < /h2> < button onClick = { onBack }
+            className = "text-white bg-white/10 px-4 py-2 rounded-full text-sm" > ← Kembali < /button> < /div> < div className =
+                "space-y-4" > { developerInfo.members.map((m, i) => < div key = { i }
+                    className = "card-game p-6 flex items-center gap-4 animate-fade-in-up"
+                    style = {
+                        { animationDelay: `${i*0.15}s` } } > < span className = "text-5xl" > { m.emoji } < /span> < div > < h3
+                    className = "text-white font-bold text-lg" > { m.name } < /h3> < p className =
+                    "text-purple-300 text-sm" > NIM: { m.nim } < /p> < p className = "text-gray-400 text-xs" > { m.role } <
+                    /p> < /div> < /div>) } < /div> < div className = "card-game p-6 mt-6 text-center" > < p className =
+                    "text-white text-sm" > 🎓 Game edukasi untuk pembelajaran matematika SMP kelas 8 < /p> < p className =
+                    "text-purple-300 text-xs mt-2" > © 2024 Petualangan PLSV - All Rights Reserved < /p> < p className =
+                    "text-yellow-300 text-xs mt-2" > 🎵 Music by Web Audio API < /p> < /div> < /div> < /div> );
+
+        const DiagnosticTest = ({ onComplete, audio }) => { const [step, setStep] = useState(0); const [answers,
+            setAnswers] = useState([]); const [sel, setSel] = useState(null); const [fb, setFb] = useState(null); const
+        qs = [{ q: 'Manakah yang merupakan PLSV?', options: ['x+y=10', '2x+3=7', 'x²=9', '2x>5'], answer: 1 }, { q: 'Koefisien x pada 5x-3=12?',
+            options: ['-3', '12', '5', 'x'], answer: 2 }, { q: 'Nilai x dari x+4=10?', options: ['4', '5', '6', '14'],
+            answer: 2 }, { q: 'Nilai x dari 3x=18?', options: ['3', '6', '15', '21'], answer: 1 }, { q: 'Nilai x dari 2x-1=7?',
+            options: ['3', '4', '5', '8'], answer: 1 }, ]; const ha = (idx) => { if (fb) return;
+        setSel(idx); const isC = idx === qs[step].answer;
+        setFb(isC ? 'correct' : 'wrong');
+        setAnswers([...answers, { q: step, correct: isC }]);
+        isC ? audio.playCorrect() : audio.playWrong();
+        setTimeout(() => { setFb(null);
+            setSel(null); if (step < qs.length - 1) setStep(step + 1); else onComplete(answers.filter(a => a.correct)
+                .length + (isC ? 1 : 0)); }, 800); }; const cq = qs[step]; return ( < div className =
+            "flex flex-col items-center justify-center min-h-screen px-4" > < div className =
+            "card-game p-6 max-w-lg w-full text-center" > < span className = "text-4xl mb-3 block" > 📝 < /span> < h2 className =
+            "text-2xl text-white mb-2"
+        style = {
+            { fontFamily: "'Fredoka One', cursive" } } > Asesmen Diagnostik < /h2> < p className =
+            "text-purple-200 mb-4" > Soal { step + 1 }
+        dari 5 < /p> < div className = "progress-bar mb-5 h-3" > < div className = "progress-fill"
+        style = {
+            { width: `${((step+1)/5)*100}%` } } > < /div> < /div> < p className =
+            "text-white text-lg font-semibold mb-5" > { cq.q } < /p> < div className =
+            "space-y-3" > { cq.options.map((o, i) => < button key = { i }
+            onClick = {
+                () => ha(i) }
+            disabled = { !!fb }
+            className = { `option-btn w-full text-white px-5 py-3 rounded-2xl border-2 text-left ${fb&&i===sel&&!fb.includes('correct')?'wrong-flash':'bg-white/10 border-white/20'}` } >
+            <
+            span className = "font-bold text-purple-300 mr-2" > { String.fromCharCode(65 + i) }. < /span> { o } <
+            /button>) } < /div> { fb && < div className = { `mt-4 text-2xl animate-pop ${fb==='correct'?'text-green-400':'text-red-400'}` } >
+            { fb === 'correct' ? '🎉 Benar!' : '❌ Salah' } < /div> } < /div> < /div> ); };
+
+        // ==================== GAME SCREEN ====================
+        const GameScreen = ({ currentLevel, setCurrentLevel, unlockedLevels, completedLevels, isLevelCompleted,
+            markLevelCompleted, unlockLevel, score, addScore, combo, xp, playerLevel, studentName, badges, addBadge,
+            audio, spawnConfetti, allQuestionsData, setGameHistory, navigateTo, goHome }) => { const [gameState,
+                setGameState
+            ] = useState('select'); const [currentQ, setCurrentQ] = useState(0); const [monsterHP, setMonsterHP] =
+            useState(0); const [timer, setTimer] = useState(0); const [questionTimer, setQuestionTimer] = useState(
+                0); const [levelScore, setLevelScore] = useState(0); const [levelCorrect, setLevelCorrect] = useState(
+                0); const [feedback, setFeedback] = useState(null); const [fillAnswer, setFillAnswer] = useState(
+                ''); const [selectedOption, setSelectedOption] = useState(null); const [showHint, setShowHint] =
+            useState(false); const [isFirstTime, setIsFirstTime] = useState(true); const [wrongAnswers,
+                setWrongAnswers
+            ] = useState([]); const [hpAnimating, setHpAnimating] = useState(false); const timerRef = useRef(null); const
+            questionTimerRef = useRef(null); const levelData = allQuestionsData[currentLevel];
+        useEffect(() => { if ((gameState === 'playing' || gameState === 'reviewing') && levelData?.bossBattle) { audio
+                    .playBossWarning();
+                timerRef.current = setInterval(() => { setTimer(t => { if (t >= (levelData.timeLimit || 120)) {
+                            clearInterval(timerRef.current);
+                            setGameState('failed'); return t; } return t + 1; }); }, 1000); } return () => { if (
+                    timerRef.current) clearInterval(timerRef.current); }; }, [gameState, levelData, audio]);
+        useEffect(() => { if ((gameState === 'playing' || gameState === 'reviewing') && !feedback) { const tpq =
+                    levelData?.timePerQuestion || 30;
+                setQuestionTimer(tpq);
+                questionTimerRef.current = setInterval(() => { setQuestionTimer(t => { if (t <= 1) { clearInterval(
+                                questionTimerRef.current);
+                            handleAnswer(false, 0); return 0; } return t - 1; }); }, 1000); } return () => { if (
+                    questionTimerRef.current) clearInterval(questionTimerRef.current); }; }, [gameState, currentQ,
+                feedback, levelData
+            ]);
+        const startLevel = (lvl) => { setCurrentLevel(lvl); const data = allQuestionsData[lvl];
+            setGameState('playing');
+            setCurrentQ(0);
+            setMonsterHP(data.monsterHP);
+            setTimer(0);
+            setLevelScore(0);
+            setLevelCorrect(0);
+            setFeedback(null);
+            setFillAnswer('');
+            setSelectedOption(null);
+            setShowHint(false);
+            setIsFirstTime(!isLevelCompleted(lvl));
+            setWrongAnswers([]);
+            setHpAnimating(false);
+            audio.playClick(); };
+        const handleAnswer = (isCorrect, points) => { if (feedback) return; if (questionTimerRef.current) clearInterval(
+                questionTimerRef.current); if (gameState === 'playing') { setFeedback(isCorrect ? 'correct' : 'wrong'); if (
+                    isCorrect) { addScore(points, true, isFirstTime);
+                    setLevelScore(s => s + points);
+                    setLevelCorrect(c => c + 1);
+                    setMonsterHP(prev => prev - 1);
+                    setHpAnimating(true);
+                    setTimeout(() => setHpAnimating(false), 400);
+                    audio.playHpDecrease();
+                    audio.playCorrect(); } else { addScore(0, false, isFirstTime);
+                    setWrongAnswers(prev => [...prev, levelData.questions[currentQ].id]);
+                    audio.playWrong(); }
+                setTimeout(() => { setFeedback(null);
+                    setFillAnswer('');
+                    setSelectedOption(null); const currentHP = isCorrect ? monsterHP - 1 : monsterHP; if (isCorrect &&
+                        currentHP <= 0) { finishLevel(points, isCorrect); } else if (currentQ < levelData.questions
+                        .length - 1) { setCurrentQ(q => q + 1); } else { const newWrongs = isCorrect ? wrongAnswers : [
+                            ...wrongAnswers, levelData.questions[currentQ].id
+                        ]; if (newWrongs.length > 0) { setWrongAnswers(newWrongs);
+                            setGameState('reviewing');
+                            setCurrentQ(0);
+                            audio.playReviewStart(); } else if (isCorrect && currentHP <= 0) { finishLevel(points,
+                            isCorrect); } } }, 800); } else if (gameState === 'reviewing') { setFeedback(isCorrect ?
+                    'correct' : 'wrong'); if (isCorrect) { addScore(points, true, isFirstTime);
+                    setLevelScore(s => s + points);
+                    setLevelCorrect(c => c + 1);
+                    setMonsterHP(prev => prev - 1);
+                    setHpAnimating(true);
+                    setTimeout(() => setHpAnimating(false), 400); const newWrongs = wrongAnswers.filter(id => id !==
+                        levelData.questions[currentQ].id);
+                    setWrongAnswers(newWrongs);
+                    audio.playHpDecrease();
+                    audio.playCorrect(); } else { addScore(0, false, isFirstTime);
+                    audio.playWrong(); }
+                setTimeout(() => { setFeedback(null);
+                    setFillAnswer('');
+                    setSelectedOption(null); const newWrongs = isCorrect ? wrongAnswers.filter(id => id !==
+                        levelData.questions[currentQ].id) : wrongAnswers; const currentHP = isCorrect ? monsterHP -
+                        1 : monsterHP; if (newWrongs.length === 0 && currentHP <= 0) { finishLevel(points,
+                        isCorrect); } else if (newWrongs.length === 0) { finishLevel(points, isCorrect); } else { const
+                        wrongQs = levelData.questions.filter(q => newWrongs.includes(q.id)); const nextIdx = levelData
+                        .questions.findIndex(q => q.id === wrongQs[0].id);
+                    setCurrentQ(nextIdx); } }, 800); } };
+        const finishLevel = (points, isCorrect) => { setGameState('complete'); if (timerRef.current) clearInterval(
+                timerRef.current); let timeBonus = 0; if (levelData?.bossBattle && isFirstTime) { timeBonus = Math.max(0,
+                    (levelData.timeLimit - timer) * 2);
+                setLevelScore(s => s + timeBonus);
+                addScore(timeBonus, true, true); } if (isFirstTime) { unlockLevel(currentLevel + 1);
+                markLevelCompleted(currentLevel); if (currentLevel === 1) addBadge('first_blood'); if (levelCorrect + 1 >=
+                    levelData.questions.length && wrongAnswers.length === 0) addBadge('perfect'); if (currentLevel === 6)
+                    addBadge('boss_slayer'); if (currentLevel >= 6) addBadge('all_levels'); }
+            spawnConfetti();
+            audio.playVictory();
+            setGameHistory(prev => [...prev, { level: currentLevel, score: levelScore + points + timeBonus, correct: levelCorrect +
+                    1, time: timer, date: new Date().toISOString(), isFirstTime }]); };
+        const handleFillSubmit = () => { if (feedback || !fillAnswer.trim()) return; const q = levelData.questions[
+                currentQ]; const ua = fillAnswer.trim().toLowerCase().replace(/\s+/g, ''); const ca = [q.answer
+                .toLowerCase().replace(/\s+/g, ''), ...(q.alternatives || []).map(a => a.toLowerCase().replace(/\s+/g,
+                    ''))
+            ];
+            handleAnswer(ca.includes(ua), q.points || 15); };
+        if (gameState === 'select') { const levelPreviews = [{ lvl: 1, title: 'Mengenal PLSV', icon: '🌱', monster: '🐛',
+                color: 'from-green-400 to-emerald-500', time: '15s', hp: 4, desc: 'Hutan Variabel' }, { lvl: 2,
+                title: 'Penjumlahan & Pengurangan', icon: '🌿', monster: '🦎', color: 'from-teal-400 to-cyan-500',
+                time: '15s', hp: 4, desc: 'Gua Operasi' }, { lvl: 3, title: 'Perkalian & Pembagian', icon: '🍃',
+                monster: '🐺', color: 'from-blue-400 to-indigo-500', time: '20s', hp: 4, desc: 'Lembah Kalkulasi' }, {
+                lvl: 4, title: 'Bentuk Kompleks', icon: '🍂', monster: '🐉', color: 'from-purple-400 to-pink-500',
+                time: '20s', hp: 4, desc: 'Gunung Kompleks' }, { lvl: 5, title: 'Soal Cerita PLSV', icon: '🌳',
+                monster: '🦂', color: 'from-orange-400 to-red-500', time: '30s', hp: 4, desc: 'Gurun Cerita' }, { lvl: 6,
+                title: 'BOSS BATTLE', icon: '👑', monster: '👹', color: 'from-red-500 to-yellow-500', isBoss: true,
+                time: '30s', hp: 6, desc: 'Kastil Kegelapan' }, ]; return ( < div className =
+                "flex flex-col items-center min-h-screen px-4 py-4" > < div className =
+                "w-full max-w-4xl flex justify-between items-center mb-4" > < div className =
+                "flex items-center gap-3" > < span className = "text-3xl" > 🧙‍♂️ < /span> < div > < p className =
+                "text-white text-sm"
+            style = {
+                { fontFamily: "'Fredoka One', cursive" } } > { studentName || 'Petualang' } < /p> < p className =
+                "text-purple-300 text-xs" > Lv. { playerLevel } | XP: { xp } < /p> < /div> < /div> < div className =
+                "flex items-center gap-3" > < span className = "text-yellow-400 font-bold" > ⭐{ score } < /span> < span
+            className = "text-purple-300 text-sm" > 🔥{ combo } x < /span> < button onClick = { goHome }
+            className = "btn-game btn-home px-4 py-2 text-xs" > 🏠 Beranda < /button> < /div> < /div> < div className =
+                "w-full max-w-4xl mb-5" > < div className = "flex justify-between text-white text-xs mb-1" > < span > XP
+                Progress < /span> < span > { xp % 100 }
+            /100 → Lv. { playerLevel + 1 } < /span> < /div> < div className = "progress-bar h-3" > < div className =
+                "progress-fill"
+            style = {
+                { width: `${xp%100}%` } } > < /div> < /div> < /div> < h2 className =
+                "text-2xl md:text-3xl text-white mb-4 text-center"
+            style = {
+                { fontFamily: "'Fredoka One', cursive" } } > 🗺️ Peta Petualangan PLSV < /h2> < p className =
+                "text-purple-200 text-sm mb-4 text-center" > Klik level untuk memulai!Selamatkan Dunia Numerika! < /p> <
+                div className =
+                "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl w-full mb-5" > { levelPreviews.map(lp => {
+                    const iu = unlockedLevels.includes(lp.lvl); const comp = isLevelCompleted(lp.lvl); return ( < div
+                        key = { lp.lvl }
+                        onClick = {
+                            () => iu && startLevel(lp.lvl) }
+                        className = { `card-game p-5 text-center relative ${iu?'cursor-pointer hover:scale-105':'opacity-50 cursor-not-allowed'}` } >
+                        <
+                        div className = { `absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${lp.color}` } > < /div> { lp
+                            .isBoss && < div className = "absolute -top-1 -right-1 text-xl animate-pulse-glow" > ⚡ <
+                            /div> } { comp && < div className = "level-completed-badge" > ✅ < /div> } < span className =
+                            "text-4xl block mb-2" > { lp.icon } < /span> < span className =
+                            "text-3xl block mb-1 monster-card" > { lp.monster } < /span> < h3 className =
+                            "text-white text-lg mb-1"
+                        style = {
+                            { fontFamily: "'Fredoka One', cursive" } } > Level { lp.lvl } < /h3> < p className =
+                            "text-gray-300 text-sm" > { lp.title } < /p> < p className =
+                            "text-gray-400 text-xs" > { lp.desc } < /p> < p className =
+                            "text-yellow-400 text-xs mt-1" > ⏱️ { lp.time }
+                        /soal | ❤️ { lp.hp } HP < /p> { comp && < p className = "text-green-400 text-xs mt-1" > ✓ Level
+                            Selesai < /p> } { !iu && < span className = "text-2xl" > 🔒 < /span> } < /div> ); }) } < /div> <
+                        div className = "flex gap-3 flex-wrap justify-center" > < button onClick = {
+                            () => navigateTo('report') }
+                        className = "btn-game bg-purple-600 px-6" > 📊 Laporan < /button> < button onClick = {
+                            () => navigateTo('result') }
+                        className = "btn-game btn-warning px-6" > 🏆 Hasil < /button> < /div> { badges.length > 0 && < div
+                        className = "max-w-4xl w-full mt-5" > < h3 className =
+                        "text-white text-lg mb-2 text-center" > 🏅 Badge Diperoleh < /h3> < div className =
+                        "flex gap-2 flex-wrap justify-center" > { badges.map((b, i) => < span key = { i }
+                            className = "bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20"
+                            title = { b.desc } > { b.icon } { b.name } < /span>) } < /div> < /div> } < /div> ); } const q =
+            gameState === 'reviewing' && wrongAnswers.length > 0 ? levelData.questions.find(q => q.id === wrongAnswers[
+                0]) : levelData.questions[currentQ]; if (!q) return null; const timeLeft = levelData?.bossBattle ? Math.max(
+                0, (levelData.timeLimit || 120) - timer) : null; const timePerQ = levelData?.timePerQuestion || 30; return ( <
+            div className = "flex flex-col items-center min-h-screen px-4 py-3" > < div className =
+                "w-full max-w-3xl flex justify-between items-center mb-3" > < div > < /div> < div className =
+                "flex items-center gap-3 flex-wrap" > < span className =
+                "text-yellow-400 text-sm font-bold" > ⭐{ score } < /span> < span className =
+                "text-purple-300 text-sm" > 🔥{ combo } x < /span> { timeLeft !== null && < span className =
+                { `text-sm font-bold ${timeLeft<30?'text-red-400 animate-pulse':'text-orange-400'}` } > ⏱️ { timeLeft }
+            s < /span> } { !isFirstTime && < span className =
+                "text-gray-400 text-xs bg-white/10 px-2 py-1 rounded-full" > 🔄 Ulang < /span> } { gameState ===
+                'reviewing' && < span className = "review-mode-badge" > 📝 Review: { wrongAnswers.length } soal <
+                /span> } < /div> < /div> < div className = "w-full max-w-3xl mb-3" > < div className =
+                "flex justify-between text-white text-xs mb-1" > < span > { levelData.title } { gameState === 'reviewing' &&
+                '(Review Soal Salah)' } < /span> < span > Soal { currentQ + 1 }
+            / { levelData.questions.length } < /span> < /div> < div className = "progress-bar h-2" > < div className =
+                "progress-fill"
+            style = {
+                { width: `${((currentQ+1)/levelData.questions.length)*100}%` } } > < /div> < /div> < /div> < div className =
+                "flex items-center gap-3 mb-3" > < span className =
+                "text-4xl md:text-5xl monster-card" > { levelData.monster } < /span> < div > < p className =
+                "text-white text-base"
+            style = {
+                { fontFamily: "'Fredoka One', cursive" } } > { levelData.monsterName } < /p> < div className =
+                "flex gap-1" > { Array.from({ length: levelData.monsterHP }).map((_, i) => ( < span key = { i }
+                    className = { `text-lg transition-all duration-300 ${i < monsterHP ? 'text-red-400' : 'text-gray-600'} ${hpAnimating && i === monsterHP ? 'animate-hp-decrease' : ''}` } >
+                    { i < monsterHP ? '❤️' : '🖤' } < /span> )) } < /div> < p className =
+                "text-gray-400 text-xs mt-1" > HP: { monsterHP }
+            / { levelData.monsterHP } < /p> < /div> < /div> < div className =
+            { `card-game p-5 md:p-7 max-w-3xl w-full relative ${gameState==='reviewing'?'animate-review-glow':''}` } > {
+                feedback && < div className =
+                { `absolute inset-0 flex items-center justify-center z-10 rounded-3xl ${feedback==='correct'?'bg-green-500/20':'bg-red-500/20'} backdrop-blur-sm` } >
+                <
+                span className = { `text-5xl animate-pop ${feedback==='correct'?'text-green-300':'text-red-300'}` } > { feedback ===
+                    'correct' ? '🎉 Benar! HP -1' : '❌ Salah' } < /span> < /div> } < div className =
+                "mb-4" > < QuestionTimer timeLeft = { questionTimer }
+            totalTime = { timePerQ }
+            audio = { audio }
+            /> < /div> { gameState === 'reviewing' && wrongAnswers.length > 0 && < div className =
+                "mb-4 p-3 bg-yellow-500/10 border border-yellow-400/30 rounded-xl" > < p className =
+                "text-yellow-300 text-xs mb-2 font-bold" > 📝 Soal yang perlu diulang( { wrongAnswers.length }): < /p> < div
+                className = "flex flex-wrap gap-2" > { wrongAnswers.map(id => { const wq = levelData.questions.find(q =>
+                        q.id === id); return wq ? < span key = { id }
+                        className = "text-white text-xs bg-red-500/20 px-2 py-1 rounded-lg" > Soal { wq.id + 1 } <
+                        /span> : null; }) } < /div> < /div> } < p className =
+                "text-white text-base md:text-lg font-semibold mb-4 text-center" > { q.q } < /p> { q.type === 'multiple' &&
+                <
+                div className = "space-y-2.5" > { q.options.map((o, i) => < button key = { i }
+                    onClick = {
+                        () => handleAnswer(i === q.answer, q.points) }
+                    disabled = { !!feedback }
+                    className = { `option-btn w-full text-white px-4 py-3 rounded-xl border-2 text-left transition-all ${feedback&&i===selectedOption&&!feedback.includes('correct')?'wrong-flash':'bg-white/10 border-white/20 hover:border-purple-400'}` } >
+                    <
+                    span className = "font-bold text-purple-300 mr-2" > { String.fromCharCode(65 + i) }. < /span> { o } <
+                    /button>) } < /div> } { q.type === 'truefalse' && < div className =
+                    "flex gap-4 justify-center" > < button onClick = {
+                        () => handleAnswer(q.answer === true, q.points) }
+                    disabled = { !!feedback }
+                    className = "btn-game btn-success text-lg px-8" > ✅ Benar < /button> < button onClick = {
+                        () => handleAnswer(q.answer === false, q.points) }
+                    disabled = { !!feedback }
+                    className = "btn-game btn-danger text-lg px-8" > ❌ Salah < /button> < /div> } { q.type === 'fill' && <
+                    div className = "flex flex-col items-center gap-3" > < input type = "text"
+                    value = { fillAnswer }
+                    onChange = { e => setFillAnswer(e.target.value) }
+                    onKeyDown = { e => e.key === 'Enter' && handleFillSubmit() }
+                    placeholder = "Ketik jawabanmu di sini..."
+                    disabled = { !!feedback }
+                    className = "w-full max-w-md bg-white/15 text-white px-4 py-3 rounded-xl border-2 border-white/30 focus:border-purple-400 outline-none text-center text-base"
+                    autoFocus / > < button onClick = { handleFillSubmit }
+                    disabled = { !!feedback || !fillAnswer.trim() }
+                    className = "btn-game px-6" > ✨ Submit Jawaban < /button> < /div> } < /div> < div className =
+                    "flex gap-2 mt-3" > < button onClick = {
+                        () => setShowHint(!showHint) }
+                    className = "text-white bg-white/10 px-3 py-1.5 rounded-full hover:bg-white/20 text-xs" > 💡
+                    Petunjuk < /button> < /div> { showHint && < div className =
+                        "card-game p-4 max-w-3xl w-full mt-2 animate-pop" > < p className =
+                        "text-yellow-300 text-sm" > 💡 Tips: Pindah ruas = ganti tanda!Kumpulkan variabel di satu sisi,
+                        konstanta di sisi lain.Sederhanakan, lalu bagi dengan koefisien. < /p> < /div> } { gameState ===
+                        'complete' && < div className =
+                        "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4" > < div
+                    className = "card-game p-7 text-center max-w-md w-full animate-pop" > < span className =
+                        "text-6xl block mb-3" > 🎉 < /span> < h3 className = "text-white text-2xl mb-2"
+                    style = {
+                        { fontFamily: "'Fredoka One', cursive" } } > Level Selesai! < /h3> < p className =
+                        "text-purple-200 mb-3" > { levelData.monsterName } berhasil dikalahkan! < /p> < div className =
+                        "flex gap-4 justify-center text-white mb-3" > < span > ⭐{ levelScore } poin < /span> < span > ✅{ levelCorrect } benar <
+                        /span> < /div> < button onClick = {
+                            () => { setGameState('select'); if (currentLevel < 6) setCurrentLevel(currentLevel + 1); else
+                                navigateTo('result'); } }
+                        className = "btn-game px-6" > { currentLevel < 6 ? '➡️ Level Selanjutnya' :
+                        '🏆 Lihat Hasil' } < /button> < /div> < /div> } { gameState === 'failed' && < div className =
+                        "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4" > < div
+                    className = "card-game p-7 text-center max-w-md w-full animate-shake" > < span className =
+                        "text-6xl block mb-3" > ⏰ < /span> < h3 className = "text-white text-xl mb-2"
+                    style = {
+                        { fontFamily: "'Fredoka One', cursive" } } > Waktu Habis! < /h3> < p className =
+                        "text-purple-200 mb-4" > Coba lagi lebih cepat! < /p> < button onClick = {
+                            () => { setGameState('playing');
+                                setCurrentQ(0);
+                                setMonsterHP(levelData.monsterHP);
+                                setTimer(0);
+                                setLevelScore(0);
+                                setLevelCorrect(0);
+                                setFeedback(null);
+                                setFillAnswer('');
+                                setSelectedOption(null);
+                                setWrongAnswers([]); } }
+                        className = "btn-game px-6" > 🔄 Coba Lagi < /button> < /div> < /div> } < /div> ); };
+
+        // ==================== RESULT SCREEN ====================
+        const ResultScreen = ({ score, totalCorrect, totalWrong, badges, playerLevel, maxCombo, studentName, studentClass,
+            studentAbsen, onReplay, onHome, onExportExcel, onShareWA, addToLeaderboard, leaderboard,
+        spawnConfetti }) => { const [nameInput, setNameInput] = useState(studentName || ''); const [submitted, setSubmitted] =
+            useState(false);
+        useEffect(() => { spawnConfetti(); }, []); const acc = totalCorrect + totalWrong > 0 ? Math.round((totalCorrect / (
+            totalCorrect + totalWrong)) * 100) : 0; const getRank = () => { if (score >= 300) return { t: 'Grand Master PLSV',
+                e: '👑', c: 'text-yellow-300' }; if (score >= 200) return { t: 'Ksatria Persamaan', e: '🗡️',
+            c: 'text-purple-300' }; if (score >= 100) return { t: 'Pelajar Hebat', e: '📖', c: 'text-blue-300' }; return { t: 'Pemula Ceria',
+            e: '🌱', c: 'text-green-300' }; }; const rank = getRank(); return ( < div className =
+            "flex flex-col items-center min-h-screen px-4 py-6" > < div className =
+            "card-game p-6 max-w-2xl w-full text-center" > < span className =
+            "text-7xl block mb-3 animate-float" > 🏆 < /span> < h2 className = "text-2xl text-white mb-2 glow-text"
+        style = {
+            { fontFamily: "'Fredoka One', cursive" } } > Dunia Numerika Terselamatkan! < /h2> < p className =
+            "text-purple-200 mb-2" > { studentName } - { studentClass } (Absen { studentAbsen }) < /p> < div className =
+            "grid grid-cols-4 gap-3 mb-5" > < div className = "bg-white/10 rounded-2xl p-3" > < p className =
+            "text-yellow-400 text-xl font-bold" > { score } < /p> < p className = "text-gray-300 text-xs" > Skor < /p> <
+        /div> < div className = "bg-white/10 rounded-2xl p-3" > < p className =
+            "text-green-400 text-xl font-bold" > { acc } % < /p> < p className = "text-gray-300 text-xs" > Akurasi < /p> <
+        /div> < div className = "bg-white/10 rounded-2xl p-3" > < p className =
+            "text-purple-400 text-xl font-bold" > { maxCombo } x < /p> < p className = "text-gray-300 text-xs" > Max Combo <
+        /p> < /div> < div className = "bg-white/10 rounded-2xl p-3" > < p className =
+            "text-pink-400 text-xl font-bold" > { badges.length } < /p> < p className = "text-gray-300 text-xs" > Badge <
+        /p> < /div> < /div> < div className = "mb-5" > < p className = { `text-xl font-bold ${rank.c}` }
+        style = {
+            { fontFamily: "'Fredoka One', cursive" } } > { rank.e } { rank.t } < /p> < /div> { badges.length > 0 && < div
+        className = "mb-5" > < h3 className = "text-white mb-2" > 🏅 Badge Diperoleh < /h3> < div className =
+            "flex gap-2 flex-wrap justify-center" > { badges.map((b, i) => < span key = { i }
+            className = "bg-white/15 text-white px-3 py-1 rounded-full text-sm border border-white/20" title = { b.desc } > { b
+                .icon } { b.name } < /span>) } < /div> < /div> } { !submitted && < div className =
+            "mb-4 flex gap-2 justify-center" > < input type = "text"
+            value = { nameInput }
+            onChange = { e => setNameInput(e.target.value) }
+            placeholder = "Nama untuk leaderboard..."
+            className = "bg-white/15 text-white px-4 py-2 rounded-xl border border-white/20 outline-none text-sm" / > <
+            button onClick = {
+                () => { addToLeaderboard(nameInput);
+                    setSubmitted(true); } }
+            className = "btn-game text-sm px-4" > Simpan < /button> < /div> } { leaderboard.length > 0 && < div className =
+            "mb-5 text-left" > < h3 className = "text-white text-center mb-2" > 📋 Leaderboard < /h3> < div className =
+            "max-h-32 overflow-y-auto scrollbar-custom" > { leaderboard.slice(0, 5).map((e, i) => < div key = { i }
+            className = "flex justify-between text-white text-sm py-1.5 px-3 bg-white/5 rounded-lg mb-1" > < span > { i +
+            1 }. { e.name } ({ e.class }) < /span> < span > ⭐{ e.score } < /span> < /div>) } < /div> < /div> } < div className =
+            "grid grid-cols-2 sm:grid-cols-4 gap-2" > < button onClick = { onReplay }
+        className = "btn-game text-sm py-2" > 🔄 Main Lagi < /button> < button onClick = { onExportExcel }
+        className = "btn-game btn-success text-sm py-2" > 📥 Excel < /button> < button onClick = { onShareWA }
+        className = "btn-game bg-green-500 text-sm py-2" > 💬 WA < /button> < button onClick = { onHome }
+        className = "btn-game btn-home text-sm py-2" > 🏠 Beranda < /button> < /div> < /div> < /div> ); };
+
+        // ==================== REPORT SCREEN ====================
+        const ReportScreen = ({ score, totalCorrect, totalWrong, badges, playerLevel, maxCombo, unlockedLevels,
+            completedLevels, gameHistory, studentName, studentClass, studentAbsen, onBack, onHome, onExportExcel,
+        onShareWA }) => { const acc = totalCorrect + totalWrong > 0 ? Math.round((totalCorrect / (totalCorrect + totalWrong)) *
+            100) : 0; const hl = Math.max(...unlockedLevels, 1); return ( < div className =
+            "flex flex-col items-center min-h-screen px-4 py-5" > < div className =
+            "card-game p-6 max-w-3xl w-full" > < div className =
+            "flex justify-between items-center mb-5" > < h2 className = "text-xl text-white"
+        style = {
+            { fontFamily: "'Fredoka One', cursive" } } > 📊 Laporan Hasil Belajar < /h2> < button onClick = { onBack }
+        className = "text-white bg-white/10 px-3 py-1.5 rounded-full text-sm" > ← Kembali < /button> < /div> < div className =
+            "bg-white/10 rounded-2xl p-4 mb-5" > < p className = "text-white" > < strong > Nama: < /strong> { studentName } <
+        /p> < p className = "text-white" > < strong > Kelas: < /strong> { studentClass } | < strong > Absen: < /strong> {
+            studentAbsen } < /p> < /div> < div className = "grid grid-cols-3 gap-3 mb-5" > < div className =
+            "bg-white/10 rounded-2xl p-3 text-center" > < p className =
+            "text-yellow-400 text-2xl font-bold" > { score } < /p> < p className = "text-gray-300 text-xs" > Skor Akhir <
+        /p> < /div> < div className = "bg-white/10 rounded-2xl p-3 text-center" > < p className =
+            "text-green-400 text-2xl font-bold" > { acc } % < /p> < p className = "text-gray-300 text-xs" > Akurasi < /p> <
+        /div> < div className = "bg-white/10 rounded-2xl p-3 text-center" > < p className =
+            "text-purple-400 text-2xl font-bold" > { hl } < /p> < p className = "text-gray-300 text-xs" > Level Tertinggi <
+        /p> < /div> < /div> { gameHistory.length > 0 && < div className = "mb-5" > < h3 className =
+            "text-white mb-2" > 📜 Riwayat Pengerjaan < /h3> < div className =
+            "space-y-1.5 max-h-36 overflow-y-auto scrollbar-custom" > { gameHistory.map((h, i) => < div key = { i }
+            className = "bg-white/5 rounded-xl p-2.5 flex justify-between text-sm" > < span className =
+            "text-white" > Lv. { h.level } { h.isFirstTime ? '' : '🔄' } < /span> < span className =
+            "text-yellow-400" > ⭐{ h.score } < /span> < span className = "text-green-400" > ✅{ h.correct } < /span> < span
+        className = "text-gray-400" > { new Date(h.date).toLocaleDateString('id-ID') } < /span> < /div>) } < /div> <
+            /div> } < div className =
+            "grid grid-cols-2 sm:grid-cols-4 gap-2" > < button onClick = { onExportExcel }
+        className = "btn-game btn-success text-sm py-2" > 📥 Export Excel < /button> < button onClick = { onShareWA }
+        className = "btn-game bg-green-500 text-sm py-2" > 💬 Share WA < /button> < button onClick = {
+            () => window.print() }
+        className = "btn-game bg-blue-500 text-sm py-2" > 🖨️ Cetak < /button> < button onClick = { onHome }
+        className = "btn-game btn-home text-sm py-2" > 🏠 Beranda < /button> < /div> < /div> < /div> ); };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render( < App / > );
+    </script>
+</body>
+</html>
